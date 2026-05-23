@@ -91,10 +91,11 @@ function summarizeRoute(route: Route, time: number, isRecommended: boolean) {
 export const action = async ({ request }: { request: Request }) => {
   try {
     const body = await request.json();
-    const { route, allRoutes, time } = body as {
+    const { route, allRoutes, time, destinationLabel } = body as {
       route: Route;
       allRoutes?: Route[];
       time: number;
+      destinationLabel?: string;
     };
 
     const routesForPrompt = (allRoutes && allRoutes.length > 0 ? allRoutes : [route]).map((r) =>
@@ -113,7 +114,8 @@ export const action = async ({ request }: { request: Request }) => {
         {
           role: "user",
           content: `Time slot: hour ${time} of 168.
-Recommended route id: ${route.id}.
+Recommended route id: ${route.id}.${destinationLabel ? `
+Destination: ${destinationLabel}.` : ""}
 All candidates:
 ${JSON.stringify(routesForPrompt, null, 2)}
 
