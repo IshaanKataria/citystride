@@ -16,7 +16,7 @@ interface MetricBarProps {
 const MetricBar = ({ label, value, rawLabel }: MetricBarProps) => (
   <div className="flex items-center gap-2">
     <span className="w-24 text-xs text-muted-foreground">{label}</span>
-    <div className="flex-1 h-2 rounded-full bg-gray-700">
+    <div className="flex-1 h-2 rounded-full bg-muted">
       <div
         className="h-full rounded-full bg-primary"
         style={{ width: `${(value * 100).toFixed(0)}%` }}
@@ -31,13 +31,13 @@ export const InspectorCard = ({ edge, time, onClose }: InspectorCardProps) => {
   const m = edge.metrics;
 
   return (
-    <div className="absolute bottom-24 left-4 z-30 w-72 rounded-lg bg-gray-900/95 p-4 shadow-lg backdrop-blur">
+    <div className="absolute bottom-24 left-4 z-30 w-72 rounded-lg bg-card/95 p-4 shadow-lg backdrop-blur border border-border">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-medium text-white">{edge.name}</h3>
+          <h3 className="font-medium text-card-foreground">{edge.name}</h3>
           <p className="text-sm text-primary">{(score * 100).toFixed(0)} / 100</p>
         </div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-white text-lg leading-none">
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-lg leading-none">
           &times;
         </button>
       </div>

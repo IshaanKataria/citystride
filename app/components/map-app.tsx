@@ -15,11 +15,11 @@ const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: numbe
   const score = computeScore(edge.metrics, time);
   return (
     <div
-      className="pointer-events-none absolute z-50 rounded-md bg-gray-900 px-3 py-2 text-sm text-white shadow-lg"
+      className="pointer-events-none absolute z-50 rounded-md bg-popover px-3 py-2 text-sm text-popover-foreground shadow-lg border border-border"
       style={{ left: x + 12, top: y - 12 }}
     >
       <div className="font-medium">{edge.name}</div>
-      <div className="text-gray-400">Score: {(score * 100).toFixed(0)}</div>
+      <div className="text-muted-foreground">Score: {(score * 100).toFixed(0)}</div>
     </div>
   );
 };
@@ -27,11 +27,11 @@ const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: numbe
 // ─── InspectorCard ──────────────────────────────────────────────
 const MetricBar = ({ label, value, rawLabel }: { label: string; value: number; rawLabel: string }) => (
   <div className="flex items-center gap-2">
-    <span className="w-24 text-xs text-gray-400">{label}</span>
-    <div className="flex-1 h-2 rounded-full bg-gray-700">
-      <div className="h-full rounded-full bg-blue-500" style={{ width: `${(value * 100).toFixed(0)}%` }} />
+    <span className="w-24 text-xs text-muted-foreground">{label}</span>
+    <div className="flex-1 h-2 rounded-full bg-muted">
+      <div className="h-full rounded-full bg-primary" style={{ width: `${(value * 100).toFixed(0)}%` }} />
     </div>
-    <span className="w-16 text-xs text-right text-gray-400">{rawLabel}</span>
+    <span className="w-16 text-xs text-right text-muted-foreground">{rawLabel}</span>
   </div>
 );
 
@@ -39,13 +39,13 @@ const InspectorCard = ({ edge, time, onClose }: { edge: GraphEdge; time: number;
   const score = computeScore(edge.metrics, time);
   const m = edge.metrics;
   return (
-    <div className="absolute bottom-24 left-4 z-30 w-72 rounded-lg bg-gray-900/95 p-4 shadow-lg backdrop-blur">
+    <div className="absolute bottom-24 left-4 z-30 w-72 rounded-lg bg-card/95 p-4 shadow-lg backdrop-blur border border-border">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-medium text-white">{edge.name}</h3>
-          <p className="text-sm text-blue-400">{(score * 100).toFixed(0)} / 100</p>
+          <h3 className="font-medium text-card-foreground">{edge.name}</h3>
+          <p className="text-sm text-primary">{(score * 100).toFixed(0)} / 100</p>
         </div>
-        <button onClick={onClose} className="text-gray-400 hover:text-white text-lg leading-none">&times;</button>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-lg leading-none">&times;</button>
       </div>
       <div className="mt-3 space-y-2">
         <MetricBar label="Lighting" value={m.lux} rawLabel={`${(m.lux * 100).toFixed(0)}%`} />
@@ -57,7 +57,7 @@ const InspectorCard = ({ edge, time, onClose }: { edge: GraphEdge; time: number;
         <MetricBar label="Venues" value={m.venues_vector[time]} rawLabel={`${(m.venues_vector[time] * 100).toFixed(0)}%`} />
       </div>
       {m.ped_confidence.nearest_sensor_m !== null && m.ped_confidence.nearest_sensor_m > 150 && (
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-muted-foreground/60">
           Estimated: {m.ped_confidence.nearest_sensor_m}m to nearest sensor
         </p>
       )}
@@ -75,14 +75,14 @@ const GhostTabs = () => {
     { label: "Events", active: false },
   ];
   return (
-    <div className="absolute top-4 left-1/2 z-30 -translate-x-1/2 flex rounded-lg bg-gray-900/90 p-1 shadow-lg backdrop-blur">
+    <div className="absolute top-4 left-1/2 z-30 -translate-x-1/2 flex rounded-lg bg-card/95 p-1 shadow-lg backdrop-blur border border-border">
       {tabs.map((tab) => (
         <div key={tab.label} className="relative" onMouseEnter={() => !tab.active && setHovered(tab.label)} onMouseLeave={() => setHovered(null)}>
-          <button disabled={!tab.active} className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${tab.active ? "bg-blue-600 text-white" : "text-gray-400 cursor-not-allowed"}`}>
+          <button disabled={!tab.active} className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${tab.active ? "bg-primary text-primary-foreground" : "text-muted-foreground cursor-not-allowed"}`}>
             {tab.label}
           </button>
           {hovered === tab.label && (
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-gray-400 shadow">Coming soon</div>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-muted-foreground shadow border border-border">Coming soon</div>
           )}
         </div>
       ))}
@@ -92,14 +92,14 @@ const GhostTabs = () => {
 
 // ─── ScoreLegend ────────────────────────────────────────────────
 const ScoreLegend = () => (
-  <div className="absolute right-4 top-4 z-30 rounded-lg bg-gray-900/90 px-4 py-3 shadow-lg backdrop-blur">
+  <div className="absolute right-4 top-4 z-30 rounded-lg bg-card/95 px-4 py-3 shadow-lg backdrop-blur border border-border">
     <div className="flex items-center gap-2">
-      <span className="text-xs text-gray-400">Lower score</span>
+      <span className="text-xs text-muted-foreground">Lower score</span>
       <div className="h-3 w-32 rounded-sm" style={{ background: "linear-gradient(to right, rgb(220,50,50), rgb(250,200,50), rgb(50,205,100))" }} />
-      <span className="text-xs text-gray-400">Higher score</span>
+      <span className="text-xs text-muted-foreground">Higher score</span>
     </div>
-    <p className="mt-1 text-xs text-gray-400 max-w-[280px]">Score reflects lighting, foot traffic, steepness, surface, transit and canopy at the selected time.</p>
-    <p className="mt-1 text-xs text-gray-500">Data: City of Melbourne open data.</p>
+    <p className="mt-1 text-xs text-muted-foreground max-w-[280px]">Score reflects lighting, foot traffic, steepness, surface, transit and canopy at the selected time.</p>
+    <p className="mt-1 text-xs text-muted-foreground/60">Data: City of Melbourne open data.</p>
   </div>
 );
 
@@ -107,15 +107,15 @@ const ScoreLegend = () => (
 const TimeSlider = ({ time, onTimeChange, isStale, routeComputedAt, onRecompute }: {
   time: number; onTimeChange: (t: number) => void; isStale: boolean; routeComputedAt: number | null; onRecompute: () => void;
 }) => (
-  <div className="absolute bottom-6 left-1/2 z-30 -translate-x-1/2 rounded-lg bg-gray-900/90 px-6 py-3 shadow-lg backdrop-blur">
+  <div className="absolute bottom-6 left-1/2 z-30 -translate-x-1/2 rounded-lg bg-card/95 px-6 py-3 shadow-lg backdrop-blur border border-border">
     <div className="flex items-center gap-4">
-      <span className="text-sm font-medium text-white min-w-[80px]">{formatHourOfWeek(time)}</span>
-      <input type="range" min={0} max={167} value={time} onChange={(e) => onTimeChange(parseInt(e.target.value, 10))} className="w-64 accent-blue-500" />
+      <span className="text-sm font-medium text-foreground min-w-[80px]">{formatHourOfWeek(time)}</span>
+      <input type="range" min={0} max={167} value={time} onChange={(e) => onTimeChange(parseInt(e.target.value, 10))} className="w-64 accent-primary" />
     </div>
     {isStale && routeComputedAt !== null && (
-      <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
+      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
         <span>Routes computed for {formatHourOfWeek(routeComputedAt)}</span>
-        <button onClick={onRecompute} className="text-blue-400 underline hover:text-blue-300">Recompute</button>
+        <button onClick={onRecompute} className="text-primary underline hover:text-primary/80">Recompute</button>
       </div>
     )}
   </div>
@@ -180,55 +180,55 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
   }, [graph.edges]);
 
   return (
-    <div className="absolute left-4 top-4 z-30 w-72 rounded-lg bg-gray-900/95 p-4 shadow-lg backdrop-blur">
-      <h2 className="text-sm font-semibold text-white mb-3">Plan a Walk</h2>
+    <div className="absolute left-4 top-4 z-30 w-72 rounded-lg bg-card/95 p-4 shadow-lg backdrop-blur border border-border">
+      <h2 className="text-sm font-semibold text-card-foreground mb-3">Plan a Walk</h2>
       <div className="space-y-2">
         <div className="relative">
           <input type="text" placeholder="From street..." value={fromText}
             onChange={(e) => { setFromText(e.target.value); setFromNode(null); setError(null); setFromSugg(searchStreets(e.target.value)); }}
-            className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none" />
+            className="w-full rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
           {fromSugg.length > 0 && (
-            <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-700 shadow-lg">
-              {fromSugg.map((e) => <li key={e.id}><button onClick={() => { setFromText(e.name); setFromNode(e.fromNodeId); setFromSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700">{e.name}</button></li>)}
+            <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-popover border border-border shadow-lg">
+              {fromSugg.map((e) => <li key={e.id}><button onClick={() => { setFromText(e.name); setFromNode(e.fromNodeId); setFromSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-popover-foreground hover:bg-accent">{e.name}</button></li>)}
             </ul>
           )}
         </div>
         <div className="relative">
           <input type="text" placeholder="To street..." value={toText}
             onChange={(e) => { setToText(e.target.value); setToNode(null); setError(null); setToSugg(searchStreets(e.target.value)); }}
-            className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none" />
+            className="w-full rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
           {toSugg.length > 0 && (
-            <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-700 shadow-lg">
-              {toSugg.map((e) => <li key={e.id}><button onClick={() => { setToText(e.name); setToNode(e.fromNodeId); setToSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700">{e.name}</button></li>)}
+            <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-popover border border-border shadow-lg">
+              {toSugg.map((e) => <li key={e.id}><button onClick={() => { setToText(e.name); setToNode(e.fromNodeId); setToSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-popover-foreground hover:bg-accent">{e.name}</button></li>)}
             </ul>
           )}
         </div>
         <button onClick={() => { if (fromNode === null || toNode === null) { setError("Please select valid streets."); return; } onFindRoute(fromNode, toNode); }}
-          disabled={isComputing} className="w-full rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+          disabled={isComputing} className="w-full rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
           {isComputing ? "Computing..." : "Find route"}
         </button>
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
       {routes && routes.length > 0 && (
-        <div className="mt-3 border-t border-gray-700 pt-3 space-y-2">
+        <div className="mt-3 border-t border-border pt-3 space-y-2">
           {routes.map((route, i) => {
             const c = ROUTE_COLORS[i % ROUTE_COLORS.length];
             return (
               <div key={route.id} className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: `rgb(${c[0]},${c[1]},${c[2]})` }}>{route.id}</span>
-                  <span className="text-xs text-white font-medium tabular-nums">{(route.score * 100).toFixed(0)}</span>
-                  <span className="text-xs text-gray-400 tabular-nums">{formatLength(route.length_m)}</span>
-                  {route.id === 1 && <span className="text-xs text-blue-400">Recommended</span>}
+                  <span className="text-xs text-card-foreground font-medium tabular-nums">{(route.score * 100).toFixed(0)}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums">{formatLength(route.length_m)}</span>
+                  {route.id === 1 && <span className="text-xs text-primary">Recommended</span>}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={() => onExplain(route.id)} className="text-xs text-gray-400 underline hover:text-white">Explain</button>
+                  <button onClick={() => onExplain(route.id)} className="text-xs text-muted-foreground underline hover:text-foreground">Explain</button>
                   <a
                     href={googleMapsUrl(route)}
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Open in Google Maps (walking directions)"
-                    className="inline-flex h-6 w-6 items-center justify-center rounded-md text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                     aria-label="Open route in Google Maps"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -240,7 +240,7 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
               </div>
             );
           })}
-          <button onClick={onClear} className="text-xs text-gray-400 underline hover:text-white">Clear routes</button>
+          <button onClick={onClear} className="text-xs text-muted-foreground underline hover:text-foreground">Clear routes</button>
         </div>
       )}
     </div>
@@ -332,22 +332,22 @@ const ExplainSlideOut = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-[420px] max-w-[92vw] bg-gradient-to-b from-gray-950 to-gray-900 border-l border-white/10 shadow-2xl overflow-y-auto">
+      <div className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-[420px] max-w-[92vw] bg-gradient-to-b from-card to-card border-l border-border shadow-2xl overflow-y-auto">
         <div className="p-7 space-y-6">
           <header className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <span
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-gray-950"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-card"
                 style={{ backgroundColor: accent }}
               >
                 {route.id}
               </span>
-              <span className="text-xs uppercase tracking-[0.18em] text-gray-400">Why this route?</span>
+              <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Why this route?</span>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white text-2xl leading-none"
+              className="text-muted-foreground hover:text-foreground text-2xl leading-none"
               aria-label="Close"
             >
               &times;
@@ -356,24 +356,24 @@ const ExplainSlideOut = ({
 
           {loading && (
             <div className="space-y-3 animate-pulse">
-              <div className="h-7 w-3/4 rounded bg-white/5" />
-              <div className="h-4 w-5/6 rounded bg-white/5" />
+              <div className="h-7 w-3/4 rounded bg-muted" />
+              <div className="h-4 w-5/6 rounded bg-muted" />
               <div className="grid grid-cols-2 gap-3 mt-4">
                 {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="h-24 rounded-xl bg-white/5" />
+                  <div key={i} className="h-24 rounded-xl bg-muted" />
                 ))}
               </div>
-              <p className="text-xs text-gray-500 pt-2">Claude is comparing the three routes…</p>
+              <p className="text-xs text-muted-foreground/60 pt-2">Claude is comparing the three routes…</p>
             </div>
           )}
 
           {error && !loading && (
-            <div className="space-y-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
-              <p className="text-sm text-red-300">Couldn't generate the pitch.</p>
-              <p className="text-xs text-red-300/60">{error}</p>
+            <div className="space-y-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+              <p className="text-sm text-destructive">Couldn't generate the pitch.</p>
+              <p className="text-xs text-destructive/60">{error}</p>
               <button
                 onClick={doFetch}
-                className="rounded-md bg-white/10 hover:bg-white/15 px-3 py-1.5 text-xs text-white"
+                className="rounded-md bg-muted hover:bg-accent px-3 py-1.5 text-xs text-foreground"
               >
                 Retry
               </button>
@@ -383,46 +383,46 @@ const ExplainSlideOut = ({
           {data && !loading && (
             <>
               <div>
-                <h2 className="text-2xl font-semibold text-white leading-tight" style={{ color: accent }}>
+                <h2 className="text-2xl font-semibold text-card-foreground leading-tight" style={{ color: accent }}>
                   {data.headline}
                 </h2>
-                <p className="mt-2 text-sm text-gray-300 leading-relaxed">{data.verdict}</p>
+                <p className="mt-2 text-sm text-foreground leading-relaxed">{data.verdict}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 {data.highlights.map((h, i) => (
                   <div
                     key={i}
-                    className="rounded-xl border border-white/8 bg-white/[0.03] p-4 hover:bg-white/[0.06] transition-colors"
+                    className="rounded-xl border border-border bg-muted/30 p-4 hover:bg-muted/60 transition-colors"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xl">{ICON_MAP[h.icon] ?? "✦"}</span>
-                      <span className="text-[10px] uppercase tracking-wider text-gray-500">{h.label}</span>
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{h.label}</span>
                     </div>
-                    <div className="text-xl font-semibold text-white tabular-nums">{h.value}</div>
-                    <div className="mt-1 text-[11px] text-gray-400">{h.compare}</div>
+                    <div className="text-xl font-semibold text-card-foreground tabular-nums">{h.value}</div>
+                    <div className="mt-1 text-[11px] text-muted-foreground">{h.compare}</div>
                   </div>
                 ))}
               </div>
 
               {data.street_picks.length > 0 && (
                 <div>
-                  <h3 className="text-[10px] uppercase tracking-[0.18em] text-gray-500 mb-3">
+                  <h3 className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
                     Streets you'll enjoy
                   </h3>
                   <div className="space-y-2">
                     {data.street_picks.map((s, i) => (
                       <div
                         key={i}
-                        className="flex items-start gap-3 rounded-lg bg-white/[0.02] border border-white/5 p-3"
+                        className="flex items-start gap-3 rounded-lg bg-muted/20 border border-border p-3"
                       >
                         <div
                           className="mt-1 h-2 w-2 rounded-full flex-shrink-0"
                           style={{ backgroundColor: accent }}
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-white">{s.name}</div>
-                          <div className="text-xs text-gray-400 mt-0.5">{s.detail}</div>
+                          <div className="text-sm font-medium text-card-foreground">{s.name}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{s.detail}</div>
                         </div>
                       </div>
                     ))}
@@ -430,7 +430,7 @@ const ExplainSlideOut = ({
                 </div>
               )}
 
-              <div className="pt-2 text-[10px] text-gray-500 uppercase tracking-wider">
+              <div className="pt-2 text-[10px] text-muted-foreground/60 uppercase tracking-wider">
                 Explained by Claude &middot; {elapsed.toFixed(1)}s
               </div>
             </>
@@ -576,7 +576,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   }, []);
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
+    <div className="relative h-screen w-screen overflow-hidden bg-background">
       {/* Map canvas */}
       <div ref={containerRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />
 

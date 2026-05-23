@@ -101,8 +101,8 @@ export const PlanWalkPanel = ({
   };
 
   return (
-    <div className="absolute left-4 top-4 z-30 w-72 rounded-lg bg-gray-900/95 p-4 shadow-lg backdrop-blur">
-      <h2 className="text-sm font-semibold text-white mb-3">Plan a Walk</h2>
+    <div className="absolute left-4 top-4 z-30 w-72 rounded-lg bg-card/95 p-4 shadow-lg backdrop-blur border border-border">
+      <h2 className="text-sm font-semibold text-card-foreground mb-3">Plan a Walk</h2>
 
       <div className="space-y-2">
         <div className="relative">
@@ -111,15 +111,15 @@ export const PlanWalkPanel = ({
             placeholder="From street..."
             value={fromText}
             onChange={(e) => handleFromChange(e.target.value)}
-            className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            className="w-full rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
           />
           {fromSuggestions.length > 0 && (
-            <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-700 shadow-lg">
+            <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-popover border border-border shadow-lg">
               {fromSuggestions.map((edge) => (
                 <li key={edge.id}>
                   <button
                     onClick={() => { setFromText(edge.name); setFromNode(edge.fromNodeId); setFromSuggestions([]); }}
-                    className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700"
+                    className="w-full px-3 py-1.5 text-left text-xs text-popover-foreground hover:bg-accent"
                   >
                     {edge.name}
                   </button>
@@ -135,15 +135,15 @@ export const PlanWalkPanel = ({
             placeholder="To street..."
             value={toText}
             onChange={(e) => handleToChange(e.target.value)}
-            className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            className="w-full rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
           />
           {toSuggestions.length > 0 && (
-            <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-700 shadow-lg">
+            <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-popover border border-border shadow-lg">
               {toSuggestions.map((edge) => (
                 <li key={edge.id}>
                   <button
                     onClick={() => { setToText(edge.name); setToNode(edge.fromNodeId); setToSuggestions([]); }}
-                    className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700"
+                    className="w-full px-3 py-1.5 text-left text-xs text-popover-foreground hover:bg-accent"
                   >
                     {edge.name}
                   </button>
@@ -162,12 +162,12 @@ export const PlanWalkPanel = ({
         </button>
 
         {error && (
-          <p className="text-xs text-red-400">{error}</p>
+          <p className="text-xs text-destructive">{error}</p>
         )}
       </div>
 
       {routes && routes.length > 0 && (
-        <div className="mt-3 border-t border-gray-700 pt-3">
+        <div className="mt-3 border-t border-border pt-3">
           <div className="space-y-2">
             {routes.map((route, i) => {
               const color = ROUTE_COLORS[i % ROUTE_COLORS.length];
@@ -180,7 +180,7 @@ export const PlanWalkPanel = ({
                     >
                       {route.id}
                     </span>
-                    <div className="text-xs text-white tabular-nums">
+                    <div className="text-xs text-card-foreground tabular-nums">
                       <span className="font-medium">{(route.score * 100).toFixed(0)}</span>
                       <span className="text-muted-foreground ml-1.5">{formatLength(route.length_m)}</span>
                     </div>
@@ -191,7 +191,7 @@ export const PlanWalkPanel = ({
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => onExplain(route.id)}
-                      className="text-xs text-muted-foreground underline hover:text-white"
+                      className="text-xs text-muted-foreground underline hover:text-foreground"
                     >
                       Explain
                     </button>
@@ -200,7 +200,7 @@ export const PlanWalkPanel = ({
                       target="_blank"
                       rel="noopener noreferrer"
                       title="Open in Google Maps (walking directions)"
-                      className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-white/10 hover:text-white transition-colors"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                       aria-label="Open route in Google Maps"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -215,7 +215,7 @@ export const PlanWalkPanel = ({
           </div>
           <button
             onClick={onClear}
-            className="mt-2 text-xs text-muted-foreground underline hover:text-white"
+            className="mt-2 text-xs text-muted-foreground underline hover:text-foreground"
           >
             Clear routes
           </button>

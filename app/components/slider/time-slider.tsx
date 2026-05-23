@@ -16,9 +16,9 @@ export const TimeSlider = ({
   onRecompute,
 }: TimeSliderProps) => {
   return (
-    <div className="absolute bottom-6 left-1/2 z-30 -translate-x-1/2 rounded-lg bg-gray-900/90 px-6 py-3 shadow-lg backdrop-blur">
+    <div className="absolute bottom-6 left-1/2 z-30 -translate-x-1/2 rounded-lg bg-card/95 px-6 py-3 shadow-lg backdrop-blur border border-border">
       <div className="flex items-center gap-4">
-        <span className="text-sm font-medium text-white min-w-[80px]">
+        <span className="text-sm font-medium text-foreground min-w-[80px]">
           {formatHourOfWeek(time)}
         </span>
         <input

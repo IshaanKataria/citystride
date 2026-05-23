@@ -1,6 +1,6 @@
 export const ScoreLegend = () => {
   return (
-    <div className="absolute right-4 top-4 z-30 rounded-lg bg-gray-900/90 px-4 py-3 shadow-lg backdrop-blur">
+    <div className="absolute right-4 top-4 z-30 rounded-lg bg-card/95 px-4 py-3 shadow-lg backdrop-blur border border-border">
       <div className="flex items-center gap-2">
         <span className="text-xs text-muted-foreground">Lower score</span>
         <div

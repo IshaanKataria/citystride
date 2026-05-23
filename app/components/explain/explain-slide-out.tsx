@@ -71,10 +71,10 @@ export const ExplainSlideOut = ({ route, time, onClose }: ExplainSlideOutProps) 
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-black/30"
+        className="fixed inset-0 z-40 bg-foreground/20"
         onClick={onClose}
       />
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-[30%] min-w-[320px] bg-gray-900 shadow-2xl overflow-y-auto">
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-[30%] min-w-[320px] bg-card shadow-2xl overflow-y-auto border-l border-border">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ export const ExplainSlideOut = ({ route, time, onClose }: ExplainSlideOutProps) 
             </div>
             <button
               onClick={onClose}
-              className="text-muted-foreground hover:text-white text-lg"
+              className="text-muted-foreground hover:text-foreground text-lg"
             >
               &times;
             </button>
@@ -96,7 +96,7 @@ export const ExplainSlideOut = ({ route, time, onClose }: ExplainSlideOutProps) 
 
           {error ? (
             <div className="space-y-3">
-              <p className="text-sm text-red-400">{error}</p>
+              <p className="text-sm text-destructive">{error}</p>
               <button
                 onClick={fetchExplanation}
                 className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
@@ -105,7 +105,7 @@ export const ExplainSlideOut = ({ route, time, onClose }: ExplainSlideOutProps) 
               </button>
             </div>
           ) : (
-            <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+            <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
               {text}
               {isStreaming && <span className="animate-pulse">|</span>}
             </div>

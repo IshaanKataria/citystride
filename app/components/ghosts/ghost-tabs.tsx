@@ -11,7 +11,7 @@ export const GhostTabs = () => {
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
 
   return (
-    <div className="absolute top-4 left-1/2 z-30 -translate-x-1/2 flex rounded-lg bg-gray-900/90 p-1 shadow-lg backdrop-blur">
+    <div className="absolute top-4 left-1/2 z-30 -translate-x-1/2 flex rounded-lg bg-card/95 p-1 shadow-lg backdrop-blur border border-border">
       {GHOST_TABS.map((tab) => (
         <div
           key={tab.label}
@@ -30,7 +30,7 @@ export const GhostTabs = () => {
             {tab.label}
           </button>
           {hoveredTab === tab.label && (
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-muted-foreground shadow">
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-muted-foreground shadow border border-border">
               Coming soon
             </div>
           )}
