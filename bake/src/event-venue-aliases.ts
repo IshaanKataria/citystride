@@ -20,4 +20,12 @@ export const VENUE_ALIASES: Record<string, string> = {
   "melbourne museum": "Melbourne Museum",
   "melbourne town hall": "Melbourne Town Hall",
   "town hall": "Melbourne Town Hall",
+  // Additional aliases added to improve scraper coverage
+  "royal botanic gardens victoria melbourne gardens": "Royal Botanic Gardens",
+  "royal botanic gardens victoria - melbourne gardens": "Royal Botanic Gardens",
+  "royal botanic gardens victoria": "Royal Botanic Gardens",
+  "melbourne gardens": "Royal Botanic Gardens",
+  "acmi cinemas": "Australian Centre For The Moving Image (ACMI)",
+  "national gallery of victoria": "NGV International",
+  "athenaeum theatre": "Athanaeum Theatre",
 };

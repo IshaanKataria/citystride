@@ -39,11 +39,19 @@ const FETCH_TIMEOUT_MS = 5000;
 const REQUEST_DELAY_MS = 300;
 const DESCRIPTION_MAX = 280;
 
+const FETCH_HEADERS: Record<string, string> = {
+  "User-Agent": UA,
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.5",
+  "Accept-Encoding": "gzip, deflate, br",
+  "Connection": "keep-alive",
+};
+
 async function fetchText(url: string): Promise<string | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { headers: { "User-Agent": UA }, signal: ctrl.signal });
+    const res = await fetch(url, { headers: FETCH_HEADERS, signal: ctrl.signal });
     if (!res.ok) return null;
     return await res.text();
   } catch {
@@ -176,11 +184,17 @@ async function main() {
     await sleep(REQUEST_DELAY_MS);
   }
 
-  await mkdir(OUTPUT_DIR, { recursive: true });
-  await writeFile(OUTPUT_FILE, JSON.stringify(events, null, 2));
   console.log(
     `Scraped ${slugs.length} candidates, kept ${events.length}, dropped ${dropped.length} (${dropped.join(", ")})`,
   );
+
+  if (events.length === 0) {
+    console.warn("WARNING: 0 events kept — skipping write to preserve existing data/events.json");
+    return;
+  }
+
+  await mkdir(OUTPUT_DIR, { recursive: true });
+  await writeFile(OUTPUT_FILE, JSON.stringify(events, null, 2));
   console.log(`wrote ${OUTPUT_FILE}`);
 }
 
