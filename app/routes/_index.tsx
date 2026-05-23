@@ -1,8 +1,6 @@
+import { lazy, Suspense, useState, useEffect } from "react";
 import { useLoaderData } from "react-router";
 
-import { ClientOnly } from "~/components/client-only";
-import { CityMap } from "~/components/map/city-map";
-import { ExplainSlideOut } from "~/components/explain/explain-slide-out";
 import { InspectorCard } from "~/components/inspector/inspector-card";
 import { ScoreLegend } from "~/components/legend/score-legend";
 import { PlanWalkPanel } from "~/components/planner/plan-walk-panel";
@@ -13,6 +11,19 @@ import { useAppState } from "~/hooks/use-app-state";
 import { useRouteComputation } from "~/hooks/use-routes";
 import { loadGraphArtifact } from "~/lib/graph";
 import type { GraphArtifact, GraphEdge } from "~/lib/types";
+
+const LazyCityMap = lazy(() =>
+  import("~/components/map/city-map").then((m) => ({ default: m.CityMap }))
+);
+const LazyExplainSlideOut = lazy(() =>
+  import("~/components/explain/explain-slide-out").then((m) => ({ default: m.ExplainSlideOut }))
+);
+
+const useIsClient = () => {
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => { setIsClient(true); }, []);
+  return isClient;
+};
 
 export const loader = async () => {
   try {
@@ -65,26 +76,26 @@ const MapWithData = ({ graph }: { graph: GraphArtifact }) => {
     ? (routes.find((r) => r.id === state.openExplanationRouteId) ?? null)
     : null;
 
+  const isClient = useIsClient();
+
   return (
     <GraphProvider value={graph}>
-      <div className="relative h-screen w-screen overflow-hidden">
-        <ClientOnly
-          fallback={
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-950">
-              <p className="text-muted-foreground">Loading map...</p>
-            </div>
-          }
-        >
-          {() => (
-            <CityMap
+      <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
+        {isClient ? (
+          <Suspense fallback={<div className="absolute inset-0 bg-gray-950" />}>
+            <LazyCityMap
               time={state.time}
               routes={routes}
               pinnedSegmentId={state.pinnedSegmentId}
               onHoverSegment={() => {}}
               onClickSegment={handleClickSegment}
             />
-          )}
-        </ClientOnly>
+          </Suspense>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-950">
+            <p className="text-muted-foreground">Loading map...</p>
+          </div>
+        )}
 
         <GhostTabs />
         <ScoreLegend />
@@ -113,16 +124,14 @@ const MapWithData = ({ graph }: { graph: GraphArtifact }) => {
           />
         )}
 
-        {openExplanationRoute && (
-          <ClientOnly>
-            {() => (
-              <ExplainSlideOut
-                route={openExplanationRoute}
-                time={state.time}
-                onClose={() => setOpenExplanation(null)}
-              />
-            )}
-          </ClientOnly>
+        {isClient && openExplanationRoute && (
+          <Suspense fallback={null}>
+            <LazyExplainSlideOut
+              route={openExplanationRoute}
+              time={state.time}
+              onClose={() => setOpenExplanation(null)}
+            />
+          </Suspense>
         )}
       </div>
     </GraphProvider>
