@@ -1,12 +1,55 @@
 {
-  "name": "city-stride",
-  "version": "1.0.0",
+  "name": "citystride",
+  "private": true,
   "type": "module",
   "scripts": {
-    "bake": "node bake/bake.js",
-    "fetch": "node bake/fetch.js"
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc",
+    "ingest": "tsx scripts/ingest/index.ts",
+    "bake": "node scripts/bake/bake.js",
+    "adapt": "tsx scripts/adapt-bake.ts",
+    "bake:full": "npm run bake && npm run adapt"
   },
   "dependencies": {
-    "@turf/turf": "^7.2.0"
+    "@anthropic-ai/sdk": "^0.98.0",
+    "@base-ui/react": "^1.5.0",
+    "@deck.gl/core": "^9.3.2",
+    "@deck.gl/layers": "^9.3.2",
+    "@deck.gl/mapbox": "^9.3.2",
+    "@fontsource-variable/geist": "^5.2.9",
+    "@react-router/node": "7.15.1",
+    "@react-router/serve": "7.15.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "isbot": "^5.1.36",
+    "lucide-react": "^1.16.0",
+    "maplibre-gl": "^5.24.0",
+    "ngraph.graph": "^20.1.2",
+    "ngraph.path": "^1.6.1",
+    "rbush": "^4.0.1",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router": "7.15.1",
+    "shadcn": "^4.8.0",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "7.15.1",
+    "@tailwindcss/vite": "^4.2.2",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4.2.2",
+    "tsx": "^4.22.3",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.3",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.7"
   }
 }
