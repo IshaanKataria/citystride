@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "../state/store";
 import { planWalk } from "../lib/api";
 import { formatTime } from "../lib/scoring";
@@ -10,15 +10,28 @@ const CARLTON: LngLat = [144.9712, -37.8054];
 
 export function PlanPanel() {
   const time = useStore((s) => s.time);
+  const mode = useStore((s) => s.mode);
   const routes = useStore((s) => s.routes);
   const routeComputedAt = useStore((s) => s.routeComputedAt);
+  const selectedEventId = useStore((s) => s.selectedEventId);
+  const setSelectedEvent = useStore((s) => s.setSelectedEvent);
   const setRoutes = useStore((s) => s.setRoutes);
   const setRouteQuery = useStore((s) => s.setRouteQuery);
   const clearRoutes = useStore((s) => s.clearRoutes);
+  const graph = useStore((s) => s.graph);
 
   const [fromLabel, setFromLabel] = useState("Flinders St Station");
   const [toLabel, setToLabel] = useState("Carlton Gardens");
   const [loading, setLoading] = useState(false);
+
+  const selectedEvent =
+    selectedEventId && graph?.events
+      ? graph.events.find((e) => e.id === selectedEventId)
+      : undefined;
+
+  useEffect(() => {
+    if (selectedEvent) setToLabel(selectedEvent.name);
+  }, [selectedEvent]);
 
   const compute = async () => {
     setLoading(true);
@@ -31,6 +44,28 @@ export function PlanPanel() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const recomputeAtCurrentTime = async () => {
+    if (selectedEvent) {
+      setLoading(true);
+      try {
+        const res = await planWalk(FLINDERS, selectedEvent.position, time);
+        setRoutes(res.routes, res.computed_at_time);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      compute();
+    }
+  };
+
+  const clearEventSelection = () => {
+    setSelectedEvent(null);
+    setToLabel("Carlton Gardens");
+    clearRoutes();
   };
 
   const isStale =
@@ -48,16 +83,36 @@ export function PlanPanel() {
           onChange={(e) => setFromLabel(e.target.value)}
           placeholder="From"
         />
-        <input
-          className="addr"
-          value={toLabel}
-          onChange={(e) => setToLabel(e.target.value)}
-          placeholder="To"
-        />
+        {selectedEvent ? (
+          <div className="addr addr-locked">
+            <span>{selectedEvent.name}</span>
+            <button
+              className="addr-clear"
+              title="Clear event"
+              onClick={clearEventSelection}
+            >
+              ×
+            </button>
+          </div>
+        ) : (
+          <input
+            className="addr"
+            value={toLabel}
+            onChange={(e) => setToLabel(e.target.value)}
+            placeholder="To"
+          />
+        )}
       </div>
-      <button className="primary" onClick={compute} disabled={loading}>
-        {loading ? "Finding..." : "Find route"}
-      </button>
+
+      {mode === "walk" && (
+        <button className="primary" onClick={compute} disabled={loading}>
+          {loading ? "Finding..." : "Find route"}
+        </button>
+      )}
+
+      {mode === "event" && !selectedEvent && (
+        <div className="event-hint">Click an event marker on the map.</div>
+      )}
 
       {routes && routes.length > 0 && (
         <div className="routes">
@@ -82,7 +137,7 @@ export function PlanPanel() {
           {isStale && (
             <div className="stale">
               <span>Routes computed for {formatTime(routeComputedAt ?? 0)}</span>
-              <button onClick={compute} className="link">
+              <button onClick={recomputeAtCurrentTime} className="link">
                 Recompute
               </button>
             </div>
