@@ -4,9 +4,13 @@
   "type": "module",
   "scripts": {
     "bake": "node bake/bake.js",
-    "fetch": "node bake/fetch.js"
+    "fetch": "node bake/fetch.js",
+    "scrape:events": "tsx bake/src/scrape-events.ts"
   },
   "dependencies": {
     "@turf/turf": "^7.2.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.22.3"
   }
 }
