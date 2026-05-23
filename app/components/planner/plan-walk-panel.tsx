@@ -1,14 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useCallback } from "react";
 
 import { useGraph } from "~/hooks/use-graph";
-import { createGeocoder } from "~/lib/geocoder";
 import { ROUTE_COLORS } from "~/lib/colors";
-import type { AddressRecord, Route } from "~/lib/types";
+import type { GraphEdge, Route } from "~/lib/types";
 
 interface PlanWalkPanelProps {
   readonly routes: readonly Route[] | null;
   readonly isComputing: boolean;
-  readonly onFindRoute: (fromNode: string, toNode: string) => void;
+  readonly onFindRoute: (fromNode: number, toNode: number) => void;
   readonly onClear: () => void;
   readonly onExplain: (routeId: number) => void;
 }
@@ -21,48 +20,51 @@ export const PlanWalkPanel = ({
   onExplain,
 }: PlanWalkPanelProps) => {
   const graph = useGraph();
-  const geocoderRef = useRef(createGeocoder(graph.addresses));
 
   const [fromText, setFromText] = useState("");
   const [toText, setToText] = useState("");
-  const [fromMatch, setFromMatch] = useState<AddressRecord | null>(null);
-  const [toMatch, setToMatch] = useState<AddressRecord | null>(null);
-  const [fromSuggestions, setFromSuggestions] = useState<readonly AddressRecord[]>([]);
-  const [toSuggestions, setToSuggestions] = useState<readonly AddressRecord[]>([]);
+  const [fromNode, setFromNode] = useState<number | null>(null);
+  const [toNode, setToNode] = useState<number | null>(null);
+  const [fromSuggestions, setFromSuggestions] = useState<readonly GraphEdge[]>([]);
+  const [toSuggestions, setToSuggestions] = useState<readonly GraphEdge[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const searchStreets = useCallback((query: string): readonly GraphEdge[] => {
+    if (query.length < 2) return [];
+    const q = query.toLowerCase();
+    const seen = new Set<string>();
+    const results: GraphEdge[] = [];
+    for (const edge of graph.edges) {
+      if (!edge.name || seen.has(edge.name)) continue;
+      if (edge.name.toLowerCase().includes(q)) {
+        seen.add(edge.name);
+        results.push(edge);
+        if (results.length >= 5) break;
+      }
+    }
+    return results;
+  }, [graph.edges]);
 
   const handleFromChange = (value: string) => {
     setFromText(value);
-    setFromMatch(null);
+    setFromNode(null);
     setError(null);
-    setFromSuggestions(value.length >= 2 ? geocoderRef.current.search(value) : []);
+    setFromSuggestions(searchStreets(value));
   };
 
   const handleToChange = (value: string) => {
     setToText(value);
-    setToMatch(null);
+    setToNode(null);
     setError(null);
-    setToSuggestions(value.length >= 2 ? geocoderRef.current.search(value) : []);
-  };
-
-  const selectFrom = (addr: AddressRecord) => {
-    setFromText(addr.address);
-    setFromMatch(addr);
-    setFromSuggestions([]);
-  };
-
-  const selectTo = (addr: AddressRecord) => {
-    setToText(addr.address);
-    setToMatch(addr);
-    setToSuggestions([]);
+    setToSuggestions(searchStreets(value));
   };
 
   const handleSubmit = () => {
-    if (!fromMatch || !toMatch) {
-      setError("Please select valid addresses from the suggestions.");
+    if (fromNode === null || toNode === null) {
+      setError("Please select valid streets from the suggestions.");
       return;
     }
-    onFindRoute(fromMatch.nearestNodeId, toMatch.nearestNodeId);
+    onFindRoute(fromNode, toNode);
   };
 
   return (
@@ -73,20 +75,20 @@ export const PlanWalkPanel = ({
         <div className="relative">
           <input
             type="text"
-            placeholder="From address..."
+            placeholder="From street..."
             value={fromText}
             onChange={(e) => handleFromChange(e.target.value)}
             className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none"
           />
           {fromSuggestions.length > 0 && (
             <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-700 shadow-lg">
-              {fromSuggestions.map((addr) => (
-                <li key={addr.address}>
+              {fromSuggestions.map((edge) => (
+                <li key={edge.id}>
                   <button
-                    onClick={() => selectFrom(addr)}
+                    onClick={() => { setFromText(edge.name); setFromNode(edge.fromNodeId); setFromSuggestions([]); }}
                     className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700"
                   >
-                    {addr.address}
+                    {edge.name}
                   </button>
                 </li>
               ))}
@@ -97,20 +99,20 @@ export const PlanWalkPanel = ({
         <div className="relative">
           <input
             type="text"
-            placeholder="To address..."
+            placeholder="To street..."
             value={toText}
             onChange={(e) => handleToChange(e.target.value)}
             className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none"
           />
           {toSuggestions.length > 0 && (
             <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-700 shadow-lg">
-              {toSuggestions.map((addr) => (
-                <li key={addr.address}>
+              {toSuggestions.map((edge) => (
+                <li key={edge.id}>
                   <button
-                    onClick={() => selectTo(addr)}
+                    onClick={() => { setToText(edge.name); setToNode(edge.fromNodeId); setToSuggestions([]); }}
                     className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700"
                   >
-                    {addr.address}
+                    {edge.name}
                   </button>
                 </li>
               ))}

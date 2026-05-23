@@ -16,7 +16,7 @@ export const MapTooltip = ({ edge, x, y, time }: MapTooltipProps) => {
       className="pointer-events-none absolute z-50 rounded-md bg-gray-900 px-3 py-2 text-sm text-white shadow-lg"
       style={{ left: x + 12, top: y - 12 }}
     >
-      <div className="font-medium">{edge.street_name}</div>
+      <div className="font-medium">{edge.name}</div>
       <div className="text-muted-foreground">
         Score: {(score * 100).toFixed(0)}
       </div>

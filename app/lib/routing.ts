@@ -26,8 +26,8 @@ export const buildRoutingGraph = (
       cost *= EDGE_PENALTY;
     }
 
-    graph.addLink(edge.from, edge.to, { edge, cost });
-    graph.addLink(edge.to, edge.from, { edge, cost });
+    graph.addLink(edge.fromNodeId, edge.toNodeId, { edge, cost });
+    graph.addLink(edge.toNodeId, edge.fromNodeId, { edge, cost });
   }
 
   return graph;
@@ -36,8 +36,8 @@ export const buildRoutingGraph = (
 const findRoute = (
   nodes: readonly GraphNode[],
   edges: readonly GraphEdge[],
-  fromId: string,
-  toId: string,
+  fromId: number,
+  toId: number,
   hourOfWeek: number,
   penalizedEdgeIds?: ReadonlySet<string>,
 ): Route | null => {
@@ -58,7 +58,7 @@ const findRoute = (
   const path = pathFinder.find(fromId, toId);
   if (!path || path.length < 2) { return null; }
 
-  const pathNodeIds = path.map((p) => String(p.id));
+  const pathNodeIds = path.map((p) => Number(p.id));
   const routeEdges: GraphEdge[] = [];
   const geometry: [number, number][] = [];
   let totalLength = 0;
@@ -68,7 +68,7 @@ const findRoute = (
     const a = pathNodeIds[i];
     const b = pathNodeIds[i + 1];
     const edge = edges.find(
-      (e) => (e.from === a && e.to === b) || (e.from === b && e.to === a),
+      (e) => (e.fromNodeId === a && e.toNodeId === b) || (e.fromNodeId === b && e.toNodeId === a),
     );
     if (edge) {
       routeEdges.push(edge);
@@ -94,8 +94,8 @@ const findRoute = (
 export const computeRoutes = (
   nodes: readonly GraphNode[],
   edges: readonly GraphEdge[],
-  fromId: string,
-  toId: string,
+  fromId: number,
+  toId: number,
   hourOfWeek: number,
 ): Route[] => {
   const route1 = findRoute(nodes, edges, fromId, toId, hourOfWeek);

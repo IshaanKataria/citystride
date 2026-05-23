@@ -6,7 +6,7 @@ import type { GraphArtifact, Route } from "~/lib/types";
 interface UseRoutesResult {
   readonly routes: readonly Route[] | null;
   readonly isComputing: boolean;
-  readonly compute: (fromNode: string, toNode: string, hourOfWeek: number) => void;
+  readonly compute: (fromNode: number, toNode: number, hourOfWeek: number) => void;
   readonly clear: () => void;
   readonly computedAt: number | null;
 }
@@ -17,7 +17,7 @@ export const useRouteComputation = (graph: GraphArtifact): UseRoutesResult => {
   const [computedAt, setComputedAt] = useState<number | null>(null);
 
   const compute = useCallback(
-    (fromNode: string, toNode: string, hourOfWeek: number) => {
+    (fromNode: number, toNode: number, hourOfWeek: number) => {
       setIsComputing(true);
       requestAnimationFrame(() => {
         const result = computeRoutes(graph.nodes, graph.edges, fromNode, toNode, hourOfWeek);
