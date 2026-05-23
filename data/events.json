@@ -1,0 +1,242 @@
+[
+  {
+    "id": "a-velvet-ant-a-flower-and-a-bird",
+    "name": "A velvet ant, a flower and a bird",
+    "description": "A velvet ant, a flower and a bird evokes a garden of knowledge anchored by three familiar figures from nature – a velvet ant, a flower and a bird. These figures represent a parliament of beings, each carrying symbolic and metaphorical weight that encourage us to reimagine what i…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/a-velvet-ant-a-flower-and-a-bird",
+    "start_date": "2026-02-19",
+    "end_date": "2026-06-06",
+    "venue_name": "Potter Museum of Art",
+    "address": "Masson Rd",
+    "position": [
+      144.964156669702,
+      -37.7973939595503
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "waitress-the-musical",
+    "name": "Waitress The Musical",
+    "description": "Broadway's smash-hit musical, Waitress, is baking its way to Melbourne for the very first time.\n\nInspired by Adrienne Shelly's beloved film and brought to life by a trailblazing creative team, including a book by acclaimed screenwriter Jessie Nelson, an original, uplifting score…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/waitress-the-musical",
+    "start_date": "2026-05-01",
+    "end_date": "2026-07-12",
+    "venue_name": "Her Majesty's Theatre",
+    "address": "219 Exhibition St",
+    "position": [
+      144.969520183129,
+      -37.8109975612842
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "the-book-of-mormon",
+    "name": "The Book of Mormon",
+    "description": "Australia’s biggest ever musical comedy is coming back to the Princess Theatre this February.\n \nIt's The Book of Mormon, the nine-time Tony Award-winning Best Musical. This outrageous musical comedy follows the misadventures of a mismatched pair of missionaries, sent on a missio…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/the-book-of-mormon",
+    "start_date": "2026-02-06",
+    "end_date": "2026-07-19",
+    "venue_name": "Princess Theatre",
+    "address": "163-181 Spring St",
+    "position": [
+      144.9723265962,
+      -37.8107257091302
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "matinees-at-acmi-cinemas",
+    "name": "Matinees at ACMI Cinemas",
+    "description": "Summer is ending, but your gateway to escapism is right here. Matinee sessions run every Friday, Saturday and Sunday throughout Autumn, with new films beginning every fortnight.\n\nJourney to the suburbs of Sydney with Jane Campion’s 1989 feature debut Sweetie, recently restored t…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/matinees-at-acmi-cinemas",
+    "start_date": "2026-03-06",
+    "end_date": "2026-12-31",
+    "venue_name": "ACMI Cinemas",
+    "address": "Fed Square, Flinders St",
+    "position": [
+      144.969070431323,
+      -37.8176107327202
+    ],
+    "resolved_via": "alias_then_venues_json"
+  },
+  {
+    "id": "fitzroy-gardens-outdoor-adventure",
+    "name": "Fitzroy Gardens Outdoor Adventure",
+    "description": "Entertain the kids by taking the outdoor adventure challenge in the heritage-listed Fitzroy Gardens.\n\nStarting off at the Fitzroy Gardens Visitor Centre, kids will collect their map and then head off on their hunt to answer 12 questions around the gardens.\n\nSuitable for primary…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/fitzroy-gardens-outdoor-adventure",
+    "start_date": "2026-02-13",
+    "end_date": "2026-10-31",
+    "venue_name": "Fitzroy Gardens Visitor Centre",
+    "address": "Wellington Parade",
+    "position": [
+      144.980455714669,
+      -37.8129616331579
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "collection-store-tours",
+    "name": "Collection Store Tours",
+    "description": "Located in Hamer Hall, the Collection Store Tour offers an exclusive behind-the-scenes look at the renowned Australian Performing Arts Collection. Featuring a selection of original objects from more than 850,000 items spanning circus, dance, music, opera and theatre, these tours…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/collection-store-tours",
+    "start_date": "2026-04-02",
+    "end_date": "2026-06-30",
+    "venue_name": "Hamer Hall",
+    "address": "100 St Kilda Rd",
+    "position": [
+      144.967992144257,
+      -37.8199901009015
+    ],
+    "resolved_via": "alias_then_venues_json"
+  },
+  {
+    "id": "melbourne-winter-masterpieces-cartier",
+    "name": "Melbourne Winter Masterpieces: CARTIER",
+    "description": "NGV presents CARTIER, a landmark exhibition featuring nearly 400 extraordinary jewels, gems, timepieces and jewellery objects alongside rare archival materials including original design drawings, sketchbooks, photographs, historical references and more.\n\nSpanning the Maison's ea…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/melbourne-winter-masterpieces-cartier",
+    "start_date": "2026-06-12",
+    "end_date": "2026-10-04",
+    "venue_name": "National Gallery of Victoria",
+    "address": "180 St Kilda Rd",
+    "position": [
+      144.969342535451,
+      -37.8230135000869
+    ],
+    "resolved_via": "alias_then_venues_json"
+  },
+  {
+    "id": "the-big-design-market-almost-winter",
+    "name": "The Big Design Market: Almost Winter",
+    "description": "The Big Design Market delivers an unparalleled way to discover the very best in independent design. \n\nVenture through this exquisite space adorned in guest artist Xue Fei Art’s captivating designs and twinkling festoon lighting, bringing warmth and a feel-good atmosphere that is…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/the-big-design-market-almost-winter",
+    "start_date": "2026-05-22",
+    "end_date": "2026-05-24",
+    "venue_name": "Royal Exhibition Building",
+    "address": "9 Nicholson St",
+    "position": [
+      144.971521914952,
+      -37.80460262432
+    ],
+    "resolved_via": "alias_then_venues_json"
+  },
+  {
+    "id": "crft-wrk-market",
+    "name": "CRFT*WRK Market",
+    "description": "The historic meets the cutting edge at CRFT* WRK, a monthly celebration of contemporary locally made craft under the big sheds at the Queen Victoria Market. \n\nExperience a totally unique craft fair showcasing independent makers of all kinds with works that you won’t find anywher…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/crft-wrk-market",
+    "start_date": "2026-04-04",
+    "end_date": "2026-08-01",
+    "venue_name": "Queen Victoria Market",
+    "address": "Queen St",
+    "position": [
+      144.957158515056,
+      -37.8075002018073
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "boho-luxe-market-christmas-edition",
+    "name": "Boho Luxe Market: Christmas Edition",
+    "description": "At Boho Luxe Market you'll see the work of some of Melbourne's most talented artists and makers in The Atrium at Fed Square.\n\nGet ready to explore an exciting mix of mindfully made fashion, handmade jewellery, beautiful crystals, yummy vegan condiments, handcrafted ceramics and…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/boho-luxe-market-christmas-edition",
+    "start_date": "2026-12-13",
+    "end_date": "2026-12-13",
+    "venue_name": "Federation Square",
+    "address": "Swanston St & Flinders St",
+    "position": [
+      144.968963600783,
+      -37.8178516571684
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "kensington-market",
+    "name": "Kensington Market",
+    "description": "Kensington Market, held on the third Sunday of the month at the Kensington Town Hall, highlights the talent and craftsmanship of a wonderful group of inner-city makers.\n\nNow in its 11th year, the market is well supported and is a popular meeting spot for locals and visitors to M…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/kensington-market",
+    "start_date": "2026-02-15",
+    "end_date": "2026-12-13",
+    "venue_name": "Kensington Town Hall",
+    "address": "30-34 Bellair St",
+    "position": [
+      144.966542722283,
+      -37.8150754791411
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "the-story-of-the-moving-image",
+    "name": "The Story of the Moving Image",
+    "description": "From the first projections and optical illusions to the birth of film and beyond, moving images have the power to spark imagination, share stories and shape history. Discover how inventors, innovators and artists at the turn of the 20th century wielded light, split time and capt…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/the-story-of-the-moving-image",
+    "start_date": "2023-08-11",
+    "end_date": "2026-12-31",
+    "venue_name": "ACMI (Australian Centre for the Moving Image)",
+    "address": "Flinders St",
+    "position": [
+      144.969070431323,
+      -37.8176107327202
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "blueys-big-play",
+    "name": "Bluey's Big Play ",
+    "description": "Bluey’s Big Play has delighted fans across the globe and now it returns home to Australia for an encore tour.\n\nWhen Dad feels like a little bit of afternoon time out, Bluey and Bingo have other plans. Join them as they pull out all of the games and cleverness at their disposal t…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/blueys-big-play",
+    "start_date": "2026-07-01",
+    "end_date": "2026-07-12",
+    "venue_name": "Comedy Theatre",
+    "address": "240 Exhibition St",
+    "position": [
+      144.97013311862,
+      -37.8102053945163
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "pride-and-prejudice-sort-of",
+    "name": "Pride and Prejudice* (*sort of)",
+    "description": "Direct from its triumph in the West End where it won the Laurence Olivier Award for Best Comedy, Pride and Prejudice* (*sort of) is a unique and audacious retelling of Jane Austen’s most iconic love story. Men, money and microphones will be fought over in this irreverent but aff…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/pride-and-prejudice-sort-of",
+    "start_date": "2026-06-18",
+    "end_date": "2026-07-18",
+    "venue_name": "Athenaeum Theatre",
+    "address": "188 Collins St",
+    "position": [
+      144.96732254212,
+      -37.814954347831
+    ],
+    "resolved_via": "alias_then_venues_json"
+  },
+  {
+    "id": "paw-patrol-live-race-to-the-rescue",
+    "name": " PAW Patrol Live: Race to the Rescue",
+    "description": "The return of PAW Patrol Live! Race to the Rescue, celebrates ten years of the iconic Broadway-style production.\n\nThe PAW Patrol are on a roll and live on stage. The heroic characters from the top-rated animated preschool series PAW Patrol complete a ruff-roaring 10th anniversar…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/paw-patrol-live-race-to-the-rescue",
+    "start_date": "2026-08-22",
+    "end_date": "2026-08-23",
+    "venue_name": "Margaret Court Arena",
+    "address": "Olympic Blvd",
+    "position": [
+      144.977591098955,
+      -37.8213252086842
+    ],
+    "resolved_via": "venues_json"
+  },
+  {
+    "id": "heartbreak-hotel",
+    "name": "Heartbreak Hotel",
+    "description": "After a sell-out season at last year's RISING festival, Wellington-based company EBKM brings back their cathartic comedy that explores what heartbreak does to our bodies and minds.\n\nDressed in lavender tassels and backed by covers of breakup songs (Elvis, Celine, the real heavy…",
+    "url": "https://whatson.melbourne.vic.gov.au/things-to-do/heartbreak-hotel",
+    "start_date": "2026-07-14",
+    "end_date": "2026-07-19",
+    "venue_name": "Fairfax Studio",
+    "address": "100 St Kilda Rd",
+    "position": [
+      144.968836241692,
+      -37.8216684581887
+    ],
+    "resolved_via": "venues_json"
+  }
+]
