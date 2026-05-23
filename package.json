@@ -10,7 +10,8 @@
     "ingest": "tsx scripts/ingest/index.ts",
     "bake": "node scripts/bake/bake.js",
     "adapt": "tsx scripts/adapt-bake.ts",
-    "bake:full": "npm run bake && npm run adapt"
+    "bake:full": "npm run bake && npm run adapt",
+    "scrape:events": "tsx bake/src/scrape-events.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

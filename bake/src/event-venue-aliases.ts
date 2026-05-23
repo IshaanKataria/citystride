@@ -1,0 +1,31 @@
+// Common event-page venue names → canonical `feature_name` in data/raw/venues.json.
+// Extend this table when the scraper warns about an un-resolvable venue.
+export const VENUE_ALIASES: Record<string, string> = {
+  "fed square": "Federation Square",
+  "federation sq": "Federation Square",
+  "ngv": "NGV International",
+  "ngv international": "NGV International",
+  "ngv australia": "The Ian Potter Centre: NGV Australia",
+  "acmi": "Australian Centre For The Moving Image (ACMI)",
+  "australian centre for the moving image": "Australian Centre For The Moving Image (ACMI)",
+  "arts centre melbourne": "Victorian Arts Centre",
+  "the arts centre": "Victorian Arts Centre",
+  "arts centre": "Victorian Arts Centre",
+  "hamer hall": "Hamer Hall",
+  "state library": "State Library Victoria",
+  "state library of victoria": "State Library Victoria",
+  "queen vic market": "Queen Victoria Market",
+  "qvm": "Queen Victoria Market",
+  "royal exhibition building": "Royal Exhibition Building",
+  "melbourne museum": "Melbourne Museum",
+  "melbourne town hall": "Melbourne Town Hall",
+  "town hall": "Melbourne Town Hall",
+  // Additional aliases added to improve scraper coverage
+  "royal botanic gardens victoria melbourne gardens": "Royal Botanic Gardens",
+  "royal botanic gardens victoria - melbourne gardens": "Royal Botanic Gardens",
+  "royal botanic gardens victoria": "Royal Botanic Gardens",
+  "melbourne gardens": "Royal Botanic Gardens",
+  "acmi cinemas": "Australian Centre For The Moving Image (ACMI)",
+  "national gallery of victoria": "NGV International",
+  "athenaeum theatre": "Athanaeum Theatre",
+};
