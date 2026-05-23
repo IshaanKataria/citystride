@@ -152,7 +152,9 @@ export function ExplainPane() {
             </p>
           ))}
           {status === "error" && (
-            <p className="explain-error-text">{text || "Something went wrong."}</p>
+            <p className="explain-error-text">
+              Couldn't generate an explanation right now. The route data is still in the inspector card if you click any segment on the map.
+            </p>
           )}
         </div>
 
