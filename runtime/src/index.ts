@@ -3,6 +3,7 @@ import cors from "cors";
 import { getArtifact, getEdgeById, nearestNodeTo } from "./graph-loader.ts";
 import { findRoute, findThreeRoutes } from "./routing.ts";
 import { composite } from "./scoring.ts";
+import { streamExplanation } from "./explain.ts";
 import type { PlanWalkRequest, PlanWalkResponse, DescribeSegmentResponse } from "../../shared/types.ts";
 
 const app = express();
@@ -78,8 +79,13 @@ app.get("/api/describe-segment/:id", async (req, res) => {
   }
 });
 
-app.post("/api/explain-route", async (_req, res) => {
-  res.status(501).json({ error: "Phase 3: not implemented yet" });
+app.post("/api/explain-route", async (req, res) => {
+  const { route, time } = req.body ?? {};
+  if (!route || typeof time !== "number") {
+    res.status(400).json({ error: "missing route or time" });
+    return;
+  }
+  await streamExplanation(route, time, res);
 });
 
 app.listen(PORT, () => {

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useControl } from "react-map-gl/maplibre";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { PathLayer } from "@deck.gl/layers";
+import { PathLayer, TextLayer } from "@deck.gl/layers";
 import { useStore } from "../state/store";
 import { composite, scoreToRgba } from "../lib/scoring";
 import type { Edge } from "../../../shared/types";
@@ -53,6 +53,7 @@ export function MapLayers() {
     );
 
     if (routes) {
+      const badges: Array<{ position: [number, number]; label: string; color: [number, number, number] }> = [];
       routes.forEach((route, idx) => {
         const color = ROUTE_PALETTE[idx] ?? ROUTE_PALETTE[0];
         const path: number[][] = [];
@@ -68,12 +69,43 @@ export function MapLayers() {
             data: [{ path }],
             getPath: (d: any) => d.path,
             getColor: [...color, 230],
-            getWidth: idx === 0 ? 9 : 6,
-            widthMinPixels: 4,
+            getWidth: idx === 0 ? 10 : 7,
+            widthMinPixels: 5,
             pickable: false,
           })
         );
+
+        const midSegmentIdx = Math.floor(route.segments.length / 2);
+        const midSegment = route.segments[midSegmentIdx];
+        if (midSegment) {
+          const midGeom = midSegment.geometry;
+          const midPoint = midGeom[Math.floor(midGeom.length / 2)];
+          badges.push({
+            position: [midPoint[0], midPoint[1]],
+            label: String(route.id),
+            color,
+          });
+        }
       });
+
+      if (badges.length > 0) {
+        list.push(
+          new TextLayer({
+            id: "route-badges",
+            data: badges,
+            getPosition: (d: any) => d.position,
+            getText: (d: any) => d.label,
+            getSize: 22,
+            getColor: [11, 15, 20, 255],
+            background: true,
+            getBackgroundColor: (d: any) => [...d.color, 255],
+            backgroundPadding: [8, 4],
+            fontWeight: 700,
+            pickable: false,
+            characterSet: "0123456789",
+          })
+        );
+      }
     }
 
     return list;

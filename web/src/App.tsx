@@ -7,6 +7,8 @@ import { PlanPanel } from "./components/PlanPanel";
 import { InspectorCard } from "./components/InspectorCard";
 import { ScoreLegend } from "./components/ScoreLegend";
 import { TimeSlider } from "./components/TimeSlider";
+import { HoverTooltip } from "./components/HoverTooltip";
+import { Ghosts } from "./components/Ghosts";
 
 const MELBOURNE_CBD = {
   longitude: 144.9694,
@@ -40,6 +42,8 @@ export default function App() {
       <InspectorCard />
       <ScoreLegend />
       <TimeSlider />
+      <Ghosts />
+      <HoverTooltip />
 
       {!graph && <div className="loading">Loading map data...</div>}
     </div>

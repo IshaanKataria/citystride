@@ -3,6 +3,7 @@ import { useStore } from "../state/store";
 import { planWalk } from "../lib/api";
 import { formatTime } from "../lib/scoring";
 import type { LngLat } from "../../../shared/types";
+import { ExplainPane } from "./ExplainPane";
 
 const FLINDERS: LngLat = [144.967, -37.8183];
 const CARLTON: LngLat = [144.9712, -37.8054];
@@ -69,6 +70,12 @@ export function PlanPanel() {
                 {"  ·  "}
                 {(r.total_length_m / 1000).toFixed(2)} km
               </span>
+              <button
+                className="link explain-link"
+                onClick={() => useStore.getState().setOpenExplanation(r.id)}
+              >
+                Explain
+              </button>
             </div>
           ))}
 
@@ -86,6 +93,7 @@ export function PlanPanel() {
           </button>
         </div>
       )}
+      <ExplainPane />
     </div>
   );
 }
