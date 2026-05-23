@@ -12,9 +12,16 @@ const MODES: Array<{ label: string; mode: Mode | null; ghost: boolean }> = [
 export function Ghosts() {
   const mode = useStore((s) => s.mode);
   const setMode = useStore((s) => s.setMode);
+  const clearRoutes = useStore((s) => s.clearRoutes);
   const routes = useStore((s) => s.routes);
   const routeQuery = useStore((s) => s.routeQuery);
   const recommended = routes && routes[0];
+
+  const switchMode = (next: Mode) => {
+    if (next === mode) return;
+    clearRoutes();
+    setMode(next);
+  };
 
   const mapsUrl = (() => {
     if (!recommended || !routeQuery) return null;
@@ -41,7 +48,7 @@ export function Ghosts() {
               className={className}
               disabled={m.ghost}
               title={m.ghost ? "Coming soon" : ""}
-              onClick={() => m.mode && setMode(m.mode)}
+              onClick={() => m.mode && switchMode(m.mode)}
             >
               {m.label}
             </button>

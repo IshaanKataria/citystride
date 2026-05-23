@@ -2,11 +2,22 @@ import type {
   GraphArtifact,
   PlanWalkResponse,
   DescribeSegmentResponse,
+  Event,
   LngLat,
 } from "../../../shared/types";
 import { buildGraph, findThreeRoutes, describeSegment as describeLocal } from "./routing";
 
 let graphReady = false;
+
+async function fetchEvents(): Promise<Event[] | undefined> {
+  try {
+    const r = await fetch("/events.json");
+    if (!r.ok) return undefined;
+    return (await r.json()) as Event[];
+  } catch {
+    return undefined;
+  }
+}
 
 export async function fetchGraph(): Promise<GraphArtifact> {
   // Try static-deployed graph first (works on Vercel + local), then fall back
@@ -17,6 +28,10 @@ export async function fetchGraph(): Promise<GraphArtifact> {
       const r = await fetch(url);
       if (!r.ok) continue;
       const artifact = (await r.json()) as GraphArtifact;
+      if (!artifact.events) {
+        const events = await fetchEvents();
+        if (events) artifact.events = events;
+      }
       buildGraph(artifact);
       graphReady = true;
       return artifact;
