@@ -361,11 +361,13 @@ const ExplainSlideOut = ({
   route,
   allRoutes,
   time,
+  destinationLabel,
   onClose,
 }: {
   route: Route;
   allRoutes: Route[] | null;
   time: number;
+  destinationLabel?: string;
   onClose: () => void;
 }) => {
   const [data, setData] = useState<Explanation | null>(null);
@@ -383,7 +385,7 @@ const ExplainSlideOut = ({
       const res = await fetch("/api/explain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ route, allRoutes, time }),
+        body: JSON.stringify({ route, allRoutes, time, destinationLabel }),
       });
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const json = (await res.json()) as Explanation | { error: string };
@@ -790,6 +792,11 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
           route={explainRoute}
           allRoutes={routes}
           time={time}
+          destinationLabel={
+            selectedEventId && graph.events
+              ? graph.events.find((e) => e.id === selectedEventId)?.name
+              : undefined
+          }
           onClose={() => setExplainRoute(null)}
         />
       )}
