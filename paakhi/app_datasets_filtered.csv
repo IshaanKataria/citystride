@@ -1,0 +1,48 @@
+Dataset,Category,Records,Signal_A_Accessibility,Signal_B_Vibrancy,Signal_C_Terrain,Signal_D_Community,Dataset URL
+Footpath steepness,City Council,"33,585 records",●,·,●,·,https://data.melbourne.vic.gov.au/explore/dataset/footpath-steepness/
+Tactile Ground Surface Indicator,City Council,357 records,●,·,·,·,https://data.melbourne.vic.gov.au/explore/dataset/tactile-ground-surface-indicator/
+Footpaths,City Council,"12,222 records",●,·,●,·,https://data.melbourne.vic.gov.au/explore/dataset/footpaths/
+Pedestrian Network,Transport,"85,326 records",●,·,●,·,https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-network/
+"Road segments, with surface type",Transport,"56,519 records",●,·,●,·,https://data.melbourne.vic.gov.au/explore/dataset/road-segments-with-surface-type/
+"Street furniture including bollards, bicycle rails, bins, drinking fountains, horse troughs, planter boxes, seats, barbecues",City Council,"23,426 records",●,·,·,○,https://data.melbourne.vic.gov.au/explore/dataset/street-furniture-including-bollards-bicycle-rails-bins-drinking-fountains-horse-/
+Drinking fountains,City Council,302 records,●,·,○,○,https://data.melbourne.vic.gov.au/explore/dataset/drinking-fountains/
+Public toilets,City Council,74 records,●,·,·,·,https://data.melbourne.vic.gov.au/explore/dataset/public-toilets/
+Older People Profile 2016 (60 years and over),People,548 records,○,·,·,·,https://data.melbourne.vic.gov.au/explore/dataset/older-people-profile-2016-60-years-and-over/
+Families with Children Profile 2016 (aged 0-12 years),People,671 records,○,·,·,·,https://data.melbourne.vic.gov.au/explore/dataset/families-with-children-profile-2016-aged-0-12-years/
+Childcare centres,Business,29 records,○,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/childcare-centres/
+Playgrounds,People,45 records,○,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/playgrounds/
+"Landmarks and places of interest, including schools, theatres, health services, sports facilities, places of worship, galleries and museums.",People,242 records,○,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/landmarks-and-places-of-interest-including-schools-theatres-health-services-spor/
+Pedestrian Counting System (counts per hour),Transport,"1,541,172 records",·,●,·,·,https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-monthly-counts-per-hour/
+Pedestrian Counting System - Past Hour (counts per minute),Transport,"48,145 records",·,●,·,·,https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-past-hour-counts-per-minute/
+Pedestrian Counting System - Sensor Locations,Transport,145 records,·,●,·,·,https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-sensor-locations/
+Street lights with emitted lux level (council-owned lights only),City Council,"106,037 records",○,●,·,·,https://data.melbourne.vic.gov.au/explore/dataset/street-lights-with-emitted-lux-level-council-owned-lights-only/
+"Feature Lighting (including light type, wattage and location)",City Council,"8,564 records",·,●,·,·,https://data.melbourne.vic.gov.au/explore/dataset/feature-lighting-including-light-type-wattage-and-location/
+"Café, restaurant, bistro seats",Business,"66,356 records",·,●,·,●,https://data.melbourne.vic.gov.au/explore/dataset/cafes-and-restaurants-with-seating-capacity/
+"Bar, tavern, pub patron capacity",Business,"5,304 records",·,●,·,·,https://data.melbourne.vic.gov.au/explore/dataset/bars-and-pubs-with-patron-capacity/
+Business establishments location and industry classification,Business,"413,550 records",·,●,·,·,https://data.melbourne.vic.gov.au/explore/dataset/business-establishments-with-address-and-industry-classification/
+Live Music Venues,Property,227 records,·,●,·,●,https://data.melbourne.vic.gov.au/explore/dataset/live-music-venues/
+Microlabs Sound Sensor Data,Sensors,"313,336 records",·,●,·,·,https://data.melbourne.vic.gov.au/explore/dataset/microlabs-sound-sensor-data/
+Microclimate sensors data,Environment,"897,085 records",·,○,●,·,https://data.melbourne.vic.gov.au/explore/dataset/microclimate-sensors-data/
+Microclimate Sensor Readings-Historical,Environment,56 records,·,○,●,·,https://data.melbourne.vic.gov.au/explore/dataset/microclimate-sensor-readings/
+"Event permits 2014-2018 including film shoots, photo shoots, weddings, Christmas parties, promotions, fun runs and public events.",Events,"2,827 records",·,●,·,●,https://data.melbourne.vic.gov.au/explore/dataset/event-permits-2014-2018-including-film-shoots-photo-shoots-weddings-christmas-pa/
+Outdoor non-smoking zones,Property,12 records,·,●,·,·,https://data.melbourne.vic.gov.au/explore/dataset/outdoor-non-smoking-zones/
+Digital Surface Model,Environment,0 records,·,·,●,·,https://data.melbourne.vic.gov.au/explore/dataset/digital-surface-model/
+Road Segment,Transport,"3,974 records",·,·,●,·,https://data.melbourne.vic.gov.au/explore/dataset/road-segment/
+Road corridors,Transport,"4,177 records",·,·,●,·,https://data.melbourne.vic.gov.au/explore/dataset/road-corridors/
+Bicycle Network,Transport,"130,048 records",·,·,●,○,https://data.melbourne.vic.gov.au/explore/dataset/bicycle-network/
+"Bicycle routes, including informal, on-road and off-road routes.",Transport,274 records,·,·,●,○,https://data.melbourne.vic.gov.au/explore/dataset/bicycle-routes-including-informal-on-road-and-off-road-routes/
+Annual Bike Counts (Super Tuesday),Transport,352 records,·,·,●,·,https://data.melbourne.vic.gov.au/explore/dataset/annual-bike-counts-super-tuesday/
+"Trees, with species and dimensions (Urban Forest)",Environment,"82,064 records",○,·,●,●,https://data.melbourne.vic.gov.au/explore/dataset/trees-with-species-and-dimensions-urban-forest/
+Tree Canopies 2021 (Urban Forest),Environment,"57,980 records",·,·,●,●,https://data.melbourne.vic.gov.au/explore/dataset/tree-canopies-2021-urban-forest/
+Self Guided Walks,People,34 records,·,·,○,●,https://data.melbourne.vic.gov.au/explore/dataset/self-guided-walks/
+Public barbecues,City Council,63 records,·,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/public-barbecues/
+"Public artworks, fountains and monuments",City Council,261 records,·,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/public-artworks-fountains-and-monuments/
+Outdoor artworks,People,202 records,·,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/outdoor-artworks/
+Laneways with greening potential,Environment,246 records,·,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/laneways-with-greening-potential/
+Renewals for Nature: City of Melbourne garden bed inventory 2024,Environment,"17,721 records",·,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/renewals-for-nature-city-of-melbourne-garden-bed-inventory-2024/
+Argyle Square Benches usage data,People,"155,764 records",○,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/guppy/
+Venues for event bookings,Events,206 records,·,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/venues-for-event-bookings/
+"Free and cheap support services, with opening hours, public transport and parking options (Helping Out)",People,119 records,○,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/free-and-cheap-support-services-with-opening-hours-public-transport-and-parking-/
+Social Indicators for City of Melbourne Residents 2023,People,594 records,·,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/social-indicators-for-city-of-melbourne-residents-2023/
+City of Melbourne Liveability and Social Indicators,People,319 records,·,·,·,●,https://data.melbourne.vic.gov.au/explore/dataset/city-of-melbourne-liveability-and-social-indicators/
+Microlabs Accelerometer Sensor Data,Sensors,"3,687 records",●,·,○,·,https://data.melbourne.vic.gov.au/explore/dataset/microlabs-accelerometer-sensor-data/

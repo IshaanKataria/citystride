@@ -1,0 +1,450 @@
+---
+title: "CityStride — Melbourne Pedestrian Network Explorer"
+format:
+  html:
+    theme: darkly
+    toc: true
+    toc-float: true
+    self-contained: true
+    page-layout: full
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+library(jsonlite)
+library(leaflet)
+library(leaflet.extras)
+library(dplyr)
+library(tidyr)
+library(sf)
+library(RColorBrewer)
+library(htmltools)
+library(htmlwidgets)
+library(viridis)
+library(ggplot2)
+library(patchwork)
+library(knitr)
+library(kableExtra)
+```
+
+```{r load-data}
+#| include: false
+#| cache: false
+
+DATA <- "/Users/paakhi/Desktop/claude hackathon/data"
+
+# ── Raw point layers ──────────────────────────────────────────────────────────
+lights   <- fromJSON(file.path(DATA, "raw/streetlights.json"))
+transit  <- fromJSON(file.path(DATA, "raw/transitstops.json"))
+trees_r  <- fromJSON(file.path(DATA, "raw/trees.json"))
+venues_r <- fromJSON(file.path(DATA, "raw/venues.json"))
+surface  <- fromJSON(file.path(DATA, "raw/roadsurface.json"))
+
+lights_df <- data.frame(
+  lon   = lights$geo_point_2d$lon,
+  lat   = lights$geo_point_2d$lat,
+  label = as.numeric(lights$label)
+) |> filter(!is.na(lon))
+
+transit_df <- data.frame(
+  lon  = transit$geo_point_2d$lon,
+  lat  = transit$geo_point_2d$lat,
+  name = transit$name,
+  type = transit$type
+) |> filter(!is.na(lon))
+
+trees_df <- data.frame(
+  lon      = trees_r$geolocation$lon,
+  lat      = trees_r$geolocation$lat,
+  life_yrs = trees_r$useful_life_expectency_value
+) |> filter(!is.na(lon))
+
+venues_df <- data.frame(
+  lon   = venues_r$co_ordinates$lon,
+  lat   = venues_r$co_ordinates$lat,
+  name  = venues_r$feature_name,
+  theme = venues_r$theme
+) |> filter(!is.na(lon))
+
+surface_df <- data.frame(
+  lon       = surface$geo_point_2d$lon,
+  lat       = surface$geo_point_2d$lat,
+  material  = surface$material,
+  condition = as.numeric(surface$condition),
+  type      = surface$type
+) |> filter(!is.na(lon))
+
+# ── Graph edges — pre-sampled slim file (2.6 MB) ─────────────────────────────
+edges_df <- fromJSON(file.path(DATA, "graph_slim.json")) |>
+  rename(fri_eve_ped = ped_fri_eve, venues_eve = venues_fri_eve) |>
+  mutate(
+    name      = ifelse(is.na(name) | name == "", "Unknown", name),
+    composite = round(
+      0.25 * lux + 0.20 * fri_eve_ped + 0.15 * steepness +
+      0.15 * surface + 0.10 * transit  + 0.10 * venues_eve + 0.05 * canopy, 3
+    )
+  )
+
+# ── Convert edges to sf LINESTRING ───────────────────────────────────────────
+edges_sf <- st_as_sf(
+  edges_df,
+  coords = c("lon1", "lat1"),
+  crs = 4326,
+  remove = FALSE
+) |> st_drop_geometry()
+
+edges_geom <- lapply(seq_len(nrow(edges_df)), function(i) {
+  st_linestring(matrix(
+    c(edges_df$lon1[i], edges_df$lat1[i],
+      edges_df$lon2[i], edges_df$lat2[i]),
+    ncol = 2, byrow = TRUE
+  ))
+})
+
+edges_sf <- st_sf(
+  edges_df,
+  geometry = st_sfc(edges_geom, crs = 4326)
+)
+```
+
+## Overview
+
+```{r summary-table}
+tibble::tibble(
+  Layer = c("Graph edges (sampled)", "Street lights", "Transit stops",
+            "Trees", "Venues", "Road surface points"),
+  Records = c(
+    formatC(nrow(edges_df), big.mark = ","),
+    formatC(nrow(lights_df), big.mark = ","),
+    formatC(nrow(transit_df), big.mark = ","),
+    formatC(nrow(trees_df), big.mark = ","),
+    formatC(nrow(venues_df), big.mark = ","),
+    formatC(nrow(surface_df), big.mark = ",")
+  ),
+  `Key metrics` = c(
+    "lux, steepness, surface, transit, canopy, ped_fri_eve, venues_fri_eve",
+    "lon, lat, lux label",
+    "lon, lat, name, type (tram/bus/taxi)",
+    "lon, lat, life expectancy (yrs)",
+    "lon, lat, feature_name, theme",
+    "lon, lat, material, condition, type"
+  )
+) |>
+  kbl() |>
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = TRUE)
+```
+
+---
+
+## Metric Distributions
+
+```{r metric-dist, fig.height=4, fig.width=11}
+make_hist <- function(x, title, fill_col) {
+  ggplot(data.frame(v = x), aes(v)) +
+    geom_histogram(bins = 40, fill = fill_col, colour = NA, alpha = 0.9) +
+    labs(title = title, x = NULL, y = "Edges") +
+    theme_minimal(base_size = 11) +
+    theme(plot.title = element_text(size = 10))
+}
+
+p1 <- make_hist(edges_df$lux,        "Lux",        "#FFD700")
+p2 <- make_hist(edges_df$steepness,  "Steepness",  "#4CAF50")
+p3 <- make_hist(edges_df$surface,    "Surface",    "#2196F3")
+p4 <- make_hist(edges_df$transit,    "Transit",    "#FF5722")
+p5 <- make_hist(edges_df$canopy,     "Canopy",     "#8BC34A")
+p6 <- make_hist(edges_df$composite,  "Composite",  "#9C27B0")
+
+p1 + p2 + p3 + p4 + p5 + p6 + plot_layout(ncol = 6)
+```
+
+---
+
+## Map 1 — Composite Street Score (Friday 7pm)
+
+*Purple = lower score, yellow = higher. Reflects lighting + foot traffic + gradient + surface + transit + canopy.*
+
+```{r map-composite}
+pal_comp <- colorNumeric(viridis(256, option = "plasma"), domain = c(0, 1))
+
+leaflet(options = leafletOptions(preferCanvas = TRUE)) |>
+  addProviderTiles("CartoDB.DarkMatter") |>
+  setView(lng = 144.963, lat = -37.814, zoom = 14) |>
+  addPolylines(
+    data    = edges_sf,
+    color   = ~pal_comp(composite),
+    weight  = 2, opacity = 0.85,
+    label   = ~paste0(name, "  |  score: ", composite)
+  ) |>
+  addLegend("bottomright", pal = pal_comp, values = c(0, 1),
+            title = "Composite<br>streetscore", opacity = 0.9)
+```
+
+---
+
+## Map 2 — Lux (Street Lighting)
+
+*Yellow dots = street lights. Lines colored by lighting score per segment.*
+
+```{r map-lux}
+pal_lux <- colorNumeric(c("#1a1a2e","#e94560","#f5a623","#ffffcc"), domain = c(0, 1))
+pal_pts <- colorNumeric(c("#333","#ffe066"),
+                        domain = range(lights_df$label, na.rm = TRUE))
+
+leaflet(options = leafletOptions(preferCanvas = TRUE)) |>
+  addProviderTiles("CartoDB.DarkMatter") |>
+  setView(lng = 144.963, lat = -37.814, zoom = 14) |>
+  addPolylines(
+    data    = edges_sf,
+    color   = ~pal_lux(lux),
+    weight  = 2, opacity = 0.8,
+    label   = ~paste0(name, "  |  lux: ", lux),
+    group   = "Lux segments"
+  ) |>
+  addCircleMarkers(
+    data        = lights_df |> slice_sample(n = 6000),
+    lng = ~lon, lat = ~lat,
+    radius = 2, stroke = FALSE,
+    fillColor   = ~pal_pts(label),
+    fillOpacity = 0.6,
+    label       = ~paste0("Lux: ", round(label, 1)),
+    group       = "Street lights"
+  ) |>
+  addLayersControl(
+    overlayGroups = c("Lux segments","Street lights"),
+    options = layersControlOptions(collapsed = FALSE)
+  ) |>
+  addLegend("bottomright", pal = pal_lux, values = c(0, 1),
+            title = "Lux score", opacity = 0.9)
+```
+
+---
+
+## Map 3 — Canopy (Tree Coverage)
+
+*Green = high canopy. Trees plotted individually.*
+
+```{r map-canopy}
+pal_can <- colorNumeric(c("#1a1a1a","#2d5a27","#52b788","#d8f3dc"), domain = c(0, 1))
+
+leaflet(options = leafletOptions(preferCanvas = TRUE)) |>
+  addProviderTiles("CartoDB.DarkMatter") |>
+  setView(lng = 144.963, lat = -37.814, zoom = 14) |>
+  addPolylines(
+    data    = edges_sf,
+    color   = ~pal_can(canopy),
+    weight  = 2.5, opacity = 0.85,
+    label   = ~paste0(name, "  |  canopy: ", canopy),
+    group   = "Canopy segments"
+  ) |>
+  addCircleMarkers(
+    data        = trees_df |> slice_sample(n = 8000),
+    lng = ~lon, lat = ~lat,
+    radius = 2, stroke = FALSE,
+    fillColor   = "#52b788", fillOpacity = 0.4,
+    label       = ~paste0("Tree life: ", life_yrs, "yr"),
+    group       = "Trees"
+  ) |>
+  addLayersControl(
+    overlayGroups = c("Canopy segments","Trees"),
+    options = layersControlOptions(collapsed = FALSE)
+  ) |>
+  addLegend("bottomright", pal = pal_can, values = c(0, 1),
+            title = "Canopy score", opacity = 0.9)
+```
+
+---
+
+## Map 4 — Pedestrian Activity (Friday 7pm)
+
+*Brighter = more foot traffic based on 145 sensor IDW interpolation.*
+
+```{r map-ped}
+pal_ped <- colorNumeric(
+  c("#0d0221","#0a1045","#0f52ba","#00d4ff","#ffffff"), domain = c(0, 1))
+
+leaflet(options = leafletOptions(preferCanvas = TRUE)) |>
+  addProviderTiles("CartoDB.DarkMatter") |>
+  setView(lng = 144.963, lat = -37.814, zoom = 14) |>
+  addPolylines(
+    data    = edges_sf,
+    color   = ~pal_ped(fri_eve_ped),
+    weight  = 2.5, opacity = 0.85,
+    label   = ~paste0(name, "  |  ped: ", round(fri_eve_ped, 3))
+  ) |>
+  addLegend("bottomright", pal = pal_ped, values = c(0, 1),
+            title = "Ped activity<br>Fri 7pm", opacity = 0.9)
+```
+
+---
+
+## Map 5 — Transit & Bailout Proximity
+
+*Lines show closeness to a transit stop. Dots = actual stops.*
+
+```{r map-transit}
+pal_tr <- colorNumeric(c("#1a0a00","#7b2d00","#ff6b35","#ffe0cc"), domain = c(0, 1))
+
+transit_df <- transit_df |>
+  mutate(stop_color = case_when(
+    type == "tram"  ~ "#00e676",
+    type == "taxi"  ~ "#ff9100",
+    TRUE            ~ "#2979ff"
+  ))
+
+leaflet(options = leafletOptions(preferCanvas = TRUE)) |>
+  addProviderTiles("CartoDB.DarkMatter") |>
+  setView(lng = 144.963, lat = -37.814, zoom = 14) |>
+  addPolylines(
+    data    = edges_sf,
+    color   = ~pal_tr(transit),
+    weight  = 2, opacity = 0.8,
+    label   = ~paste0(name, "  |  transit: ", transit),
+    group   = "Transit proximity"
+  ) |>
+  addCircleMarkers(
+    data        = transit_df,
+    lng = ~lon, lat = ~lat,
+    radius = 6, stroke = TRUE, color = "white", weight = 1,
+    fillColor   = ~stop_color, fillOpacity = 0.9,
+    label       = ~paste0(name, " (", type, ")"),
+    group       = "Transit stops"
+  ) |>
+  addLayersControl(
+    overlayGroups = c("Transit proximity","Transit stops"),
+    options = layersControlOptions(collapsed = FALSE)
+  ) |>
+  addLegend("bottomright", pal = pal_tr, values = c(0, 1),
+            title = "Transit proximity", opacity = 0.9) |>
+  addLegend("bottomleft",
+    colors = c("#00e676","#ff9100","#2979ff"),
+    labels = c("Tram","Taxi","Bus"),
+    title = "Stop type", opacity = 0.9)
+```
+
+---
+
+## Map 6 — Steepness (Accessibility)
+
+*Bright = flat = accessible for Margaret, strollers, wheelchairs.*
+
+```{r map-steepness}
+pal_st <- colorNumeric(c("#4a0000","#c62828","#ff8f00","#f9fbe7"), domain = c(0, 1))
+
+leaflet(options = leafletOptions(preferCanvas = TRUE)) |>
+  addProviderTiles("CartoDB.DarkMatter") |>
+  setView(lng = 144.963, lat = -37.814, zoom = 14) |>
+  addPolylines(
+    data    = edges_sf,
+    color   = ~pal_st(steepness),
+    weight  = 2.5, opacity = 0.85,
+    label   = ~paste0(name, "  |  flat score: ", steepness,
+                      "  |  grade: ", round(grade_raw, 1), "%")
+  ) |>
+  addLegend("bottomright", pal = pal_st, values = c(0, 1),
+            title = "Flat score<br>(1=flat, 0=steep)", opacity = 0.9)
+```
+
+---
+
+## Map 7 — All Layers Combined
+
+*Toggle layers on/off.*
+
+```{r map-all}
+pal_all <- colorNumeric(viridis(256, option = "magma"), domain = c(0, 1))
+
+leaflet(options = leafletOptions(preferCanvas = TRUE)) |>
+  addProviderTiles("CartoDB.DarkMatter") |>
+  setView(lng = 144.963, lat = -37.814, zoom = 14) |>
+  addPolylines(
+    data    = edges_sf,
+    color   = ~pal_all(composite),
+    weight  = 2, opacity = 0.75,
+    label   = ~paste0(name, " | ", composite),
+    group   = "Street score"
+  ) |>
+  addCircleMarkers(
+    data = lights_df |> slice_sample(n = 4000),
+    lng = ~lon, lat = ~lat,
+    radius = 1.5, stroke = FALSE,
+    fillColor = "#FFD700", fillOpacity = 0.5,
+    label = ~paste0("Light: ", round(label, 1), " lux"),
+    group = "Street lights"
+  ) |>
+  addCircleMarkers(
+    data = trees_df |> slice_sample(n = 5000),
+    lng = ~lon, lat = ~lat,
+    radius = 2, stroke = FALSE,
+    fillColor = "#52b788", fillOpacity = 0.5,
+    label = ~paste0("Tree life: ", life_yrs, "yr"),
+    group = "Trees"
+  ) |>
+  addCircleMarkers(
+    data = transit_df,
+    lng = ~lon, lat = ~lat,
+    radius = 6, stroke = TRUE, color = "white", weight = 1,
+    fillColor = ~stop_color, fillOpacity = 0.9,
+    label = ~paste0(name, " (", type, ")"),
+    group = "Transit stops"
+  ) |>
+  addCircleMarkers(
+    data = venues_df,
+    lng = ~lon, lat = ~lat,
+    radius = 5, stroke = TRUE, color = "white", weight = 1,
+    fillColor = "#e040fb", fillOpacity = 0.85,
+    label = ~paste0(name, " — ", theme),
+    group = "Venues"
+  ) |>
+  addCircleMarkers(
+    data = surface_df |> filter(type == "Footway") |> slice_sample(n = 2000),
+    lng = ~lon, lat = ~lat,
+    radius = 2, stroke = FALSE,
+    fillColor = ~case_when(
+      condition < 2   ~ "#4caf50",
+      condition < 3.5 ~ "#ff9800",
+      TRUE            ~ "#f44336"
+    ),
+    fillOpacity = 0.6,
+    label = ~paste0(material, " | condition: ", round(condition, 1)),
+    group = "Road surface"
+  ) |>
+  addLayersControl(
+    overlayGroups = c("Street score","Street lights","Trees",
+                      "Transit stops","Venues","Road surface"),
+    options = layersControlOptions(collapsed = FALSE)
+  ) |>
+  addLegend("bottomright", pal = pal_all, values = c(0, 1),
+            title = "Composite score", opacity = 0.9) |>
+  addLegend("bottomleft",
+    colors = c("#00e676","#ff9100","#2979ff","#e040fb","#FFD700","#52b788"),
+    labels = c("Tram","Taxi","Bus","Venue","Street light","Tree"),
+    title  = "Point layers", opacity = 0.9)
+```
+
+---
+
+## Metric Correlation
+
+```{r correlation, fig.height=5, fig.width=8}
+edges_df |>
+  select(lux, steepness, surface, transit, canopy, fri_eve_ped, venues_eve, composite) |>
+  cor(use = "complete.obs") |>
+  as.data.frame() |>
+  tibble::rownames_to_column("metric") |>
+  tidyr::pivot_longer(-metric, names_to = "metric2", values_to = "cor") |>
+  ggplot(aes(metric, metric2, fill = cor)) +
+  geom_tile(colour = "white") +
+  geom_text(aes(label = round(cor, 2)), size = 3) +
+  scale_fill_gradient2(low = "#e53935", mid = "white", high = "#1565c0",
+                       midpoint = 0, limits = c(-1, 1)) +
+  labs(title = "Metric correlation matrix", x = NULL, y = NULL) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+```
+
+---
+
+*CityStride | City of Melbourne open data | Hackathon demo*

@@ -1,0 +1,52 @@
+Dataset,Build_Time_Metric,Keep,Records,Last Modified,Update Frequency,Dataset URL
+Pedestrian Network,graph_base,YES,"85,326 records",2019-11-19,,https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-network/
+Footpaths,graph_base,YES,"12,222 records",2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/footpaths/
+Road Segment,graph_base,YES,"3,974 records",2022-11-12,,https://data.melbourne.vic.gov.au/explore/dataset/road-segment/
+"Road segments, with surface type",graph_base,YES,"56,519 records",2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/road-segments-with-surface-type/
+Street lights with emitted lux level (council-owned lights only),lux,YES,"106,037 records",2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/street-lights-with-emitted-lux-level-council-owned-lights-only/
+"Feature Lighting (including light type, wattage and location)",lux,YES,"8,564 records",2021-10-01,,https://data.melbourne.vic.gov.au/explore/dataset/feature-lighting-including-light-type-wattage-and-location/
+Pedestrian Counting System (counts per hour),ped_count_168,YES,"1,541,172 records",2024-08-14,Daily,https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-monthly-counts-per-hour/
+Pedestrian Counting System - Past Hour (counts per minute),ped_count_168,YES,"48,145 records",2022-11-13,15 Minutes,https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-past-hour-counts-per-minute/
+Pedestrian Counting System - Sensor Locations,ped_count_168,YES,145 records,2022-11-13,Daily,https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-sensor-locations/
+Footpath steepness,steepness,YES,"33,585 records",2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/footpath-steepness/
+Tactile Ground Surface Indicator,surface_quality,YES,357 records,2021-09-30,,https://data.melbourne.vic.gov.au/explore/dataset/tactile-ground-surface-indicator/
+"Street furniture including bollards, bicycle rails, bins, drinking fountains, horse troughs, planter boxes, seats, barbecues",surface_quality,YES,"23,426 records",2021-08-13,,https://data.melbourne.vic.gov.au/explore/dataset/street-furniture-including-bollards-bicycle-rails-bins-drinking-fountains-horse-/
+Bus stops,bailout_transit,YES,309 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/bus-stops/
+City Circle tram stops,bailout_transit,YES,28 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/city-circle-tram-stops/
+Tram tracks,bailout_transit,YES,645 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/tram-tracks/
+Taxi Ranks,bailout_transit,YES,77 records,2021-09-30,,https://data.melbourne.vic.gov.au/explore/dataset/taxi-ranks/
+Bike Share Dock Locations,bailout_transit,YES,50 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/bike-share-dock-locations/
+"Café, restaurant, bistro seats",open_venues_168,YES,"66,356 records",2021-11-02,Annually,https://data.melbourne.vic.gov.au/explore/dataset/cafes-and-restaurants-with-seating-capacity/
+"Bar, tavern, pub patron capacity",open_venues_168,YES,"5,304 records",2021-11-02,Annually,https://data.melbourne.vic.gov.au/explore/dataset/bars-and-pubs-with-patron-capacity/
+Business establishments location and industry classification,open_venues_168,YES,"413,550 records",2021-11-02,Annually,https://data.melbourne.vic.gov.au/explore/dataset/business-establishments-with-address-and-industry-classification/
+Live Music Venues,open_venues_168,YES,227 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/live-music-venues/
+"Trees, with species and dimensions (Urban Forest)",canopy,YES,"82,064 records",2025-09-22,Daily,https://data.melbourne.vic.gov.au/explore/dataset/trees-with-species-and-dimensions-urban-forest/
+Tree Canopies 2021 (Urban Forest),canopy,YES,"57,980 records",2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/tree-canopies-2021-urban-forest/
+Public toilets,accessibility_layer,YES,74 records,2021-09-30,Daily,https://data.melbourne.vic.gov.au/explore/dataset/public-toilets/
+Drinking fountains,accessibility_layer,YES,302 records,2021-09-30,,https://data.melbourne.vic.gov.au/explore/dataset/drinking-fountains/
+Playgrounds,accessibility_layer,YES,45 records,2021-09-30,,https://data.melbourne.vic.gov.au/explore/dataset/playgrounds/
+Public barbecues,accessibility_layer,YES,63 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/public-barbecues/
+"Landmarks and places of interest, including schools, theatres, health services, sports facilities, places of worship, galleries and museums.",accessibility_layer,YES,242 records,2021-03-12,,https://data.melbourne.vic.gov.au/explore/dataset/landmarks-and-places-of-interest-including-schools-theatres-health-services-spor/
+Childcare centres,accessibility_layer,YES,29 records,2021-09-30,,https://data.melbourne.vic.gov.au/explore/dataset/childcare-centres/
+"Free and cheap support services, with opening hours, public transport and parking options (Helping Out)",accessibility_layer,YES,119 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/free-and-cheap-support-services-with-opening-hours-public-transport-and-parking-/
+"Public artworks, fountains and monuments",community_poi,YES,261 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/public-artworks-fountains-and-monuments/
+Outdoor artworks,community_poi,YES,202 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/outdoor-artworks/
+Laneways with greening potential,community_poi,YES,246 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/laneways-with-greening-potential/
+Renewals for Nature: City of Melbourne garden bed inventory 2024,community_poi,YES,"17,721 records",2025-09-04,Static (not updated),https://data.melbourne.vic.gov.au/explore/dataset/renewals-for-nature-city-of-melbourne-garden-bed-inventory-2024/
+Self Guided Walks,community_poi,YES,34 records,2021-09-30,Daily,https://data.melbourne.vic.gov.au/explore/dataset/self-guided-walks/
+Venues for event bookings,community_poi,YES,206 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/venues-for-event-bookings/
+Digital Surface Model,DROPPED,NO — Last updated 2019,0 records,2019-11-19,,https://data.melbourne.vic.gov.au/explore/dataset/digital-surface-model/
+Bicycle Network,DROPPED,NO — Last updated 2019,"130,048 records",2019-11-19,,https://data.melbourne.vic.gov.au/explore/dataset/bicycle-network/
+"Event permits 2014-2018 including film shoots, photo shoots, weddings, Christmas parties, promotions, fun runs and public events.",DROPPED,NO — Covers 2014-2018 only,"2,827 records",2020-02-19,,https://data.melbourne.vic.gov.au/explore/dataset/event-permits-2014-2018-including-film-shoots-photo-shoots-weddings-christmas-pa/
+Families with Children Profile 2016 (aged 0-12 years),DROPPED,NO — 2016 census snapshot,671 records,2022-12-14,,https://data.melbourne.vic.gov.au/explore/dataset/families-with-children-profile-2016-aged-0-12-years/
+Older People Profile 2016 (60 years and over),DROPPED,NO — 2016 census snapshot,548 records,2022-12-14,,https://data.melbourne.vic.gov.au/explore/dataset/older-people-profile-2016-60-years-and-over/
+Microlabs Sound Sensor Data,DROPPED,"NO — Last updated 2020, trial only","313,336 records",2020-04-20,,https://data.melbourne.vic.gov.au/explore/dataset/microlabs-sound-sensor-data/
+Microlabs Accelerometer Sensor Data,DROPPED,"NO — Last updated 2020, trial only","3,687 records",2020-05-21,,https://data.melbourne.vic.gov.au/explore/dataset/microlabs-accelerometer-sensor-data/
+Argyle Square Benches usage data,DROPPED,"NO — Single location, 2020","155,764 records",2020-05-21,,https://data.melbourne.vic.gov.au/explore/dataset/guppy/
+Microclimate Sensor Readings-Historical,DROPPED,NO — Superseded by live microclimate sensors data,56 records,2022-08-22,Hourly,https://data.melbourne.vic.gov.au/explore/dataset/microclimate-sensor-readings/
+Annual Bike Counts (Super Tuesday),DROPPED,"NO — Snapshot survey, not continuous",352 records,2023-02-26,,https://data.melbourne.vic.gov.au/explore/dataset/annual-bike-counts-super-tuesday/
+"Bicycle routes, including informal, on-road and off-road routes.",DROPPED,"NO — Last updated 2021, low record count",274 records,2021-09-30,,https://data.melbourne.vic.gov.au/explore/dataset/bicycle-routes-including-informal-on-road-and-off-road-routes/
+City of Melbourne Liveability and Social Indicators,DROPPED,"NO — Aggregate stats, not spatial — not needed for routing",319 records,2022-12-14,,https://data.melbourne.vic.gov.au/explore/dataset/city-of-melbourne-liveability-and-social-indicators/
+Social Indicators for City of Melbourne Residents 2023,DROPPED,NO — Aggregate stats only,594 records,2024-06-05,Static (not updated),https://data.melbourne.vic.gov.au/explore/dataset/social-indicators-for-city-of-melbourne-residents-2023/
+Road corridors,DROPPED,NO — Redundant with Road Segment + Pedestrian Network,"4,177 records",2021-09-30,,https://data.melbourne.vic.gov.au/explore/dataset/road-corridors/
+Microclimate sensors data,DROPPED,"NO — Nice-to-have, adds complexity; use tree canopy for shade proxy instead","897,085 records",2024-09-05,,https://data.melbourne.vic.gov.au/explore/dataset/microclimate-sensors-data/
