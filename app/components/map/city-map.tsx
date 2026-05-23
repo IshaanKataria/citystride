@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { Deck } from "@deck.gl/core";
+import { MapboxOverlay } from "@deck.gl/mapbox";
 import { PathLayer } from "@deck.gl/layers";
 
 import { useGraph } from "~/hooks/use-graph";
@@ -29,16 +29,14 @@ export const CityMap = ({
   const graph = useGraph();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const deckRef = useRef<Deck | null>(null);
+  const overlayRef = useRef<MapboxOverlay | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<{
     edge: GraphEdge;
     x: number;
     y: number;
   } | null>(null);
 
-  const updateLayers = useCallback(() => {
-    if (!deckRef.current) { return; }
-
+  const getLayers = useCallback(() => {
     const hasRoutes = routes && routes.length > 0;
 
     const streetscoreLayer = new PathLayer<GraphEdge>({
@@ -85,7 +83,7 @@ export const CityMap = ({
       }
     }
 
-    deckRef.current.setProps({ layers });
+    return layers;
   }, [graph, time, routes]);
 
   useEffect(() => {
@@ -99,16 +97,9 @@ export const CityMap = ({
       antialias: true,
     });
 
-    const deck = new Deck({
-      parent: containerRef.current,
-      viewState: {
-        longitude: 144.963,
-        latitude: -37.814,
-        zoom: 15,
-      },
-      controller: false,
+    const overlay = new MapboxOverlay({
+      interleaved: false,
       layers: [],
-      getTooltip: () => null,
       onHover: (info) => {
         if (info.object) {
           setHoveredEdge({
@@ -131,34 +122,24 @@ export const CityMap = ({
       },
     });
 
-    map.on("move", () => {
-      const center = map.getCenter();
-      const zoom = map.getZoom();
-      const bearing = map.getBearing();
-      const pitch = map.getPitch();
-      deck.setProps({
-        viewState: {
-          longitude: center.lng,
-          latitude: center.lat,
-          zoom,
-          bearing,
-          pitch,
-        },
-      });
+    map.on("load", () => {
+      map.addControl(overlay as unknown as maplibregl.IControl);
     });
 
     mapRef.current = map;
-    deckRef.current = deck;
+    overlayRef.current = overlay;
 
     return () => {
-      deck.finalize();
+      overlay.finalize();
       map.remove();
     };
   }, []);
 
   useEffect(() => {
-    updateLayers();
-  }, [updateLayers]);
+    if (overlayRef.current) {
+      overlayRef.current.setProps({ layers: getLayers() });
+    }
+  }, [getLayers]);
 
   return (
     <div ref={containerRef} className="absolute inset-0">
