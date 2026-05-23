@@ -4,11 +4,27 @@ import type {
   DescribeSegmentResponse,
   LngLat,
 } from "../../../shared/types";
+import { buildGraph, findThreeRoutes, describeSegment as describeLocal } from "./routing";
+
+let graphReady = false;
 
 export async function fetchGraph(): Promise<GraphArtifact> {
-  const r = await fetch("/api/graph");
-  if (!r.ok) throw new Error(`graph fetch ${r.status}`);
-  return r.json();
+  // Try static-deployed graph first (works on Vercel + local), then fall back
+  // to the runtime API if a local Express server is up.
+  const candidates = ["/graph.json", "/api/graph"];
+  for (const url of candidates) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) continue;
+      const artifact = (await r.json()) as GraphArtifact;
+      buildGraph(artifact);
+      graphReady = true;
+      return artifact;
+    } catch {
+      continue;
+    }
+  }
+  throw new Error("no graph source available");
 }
 
 export async function planWalk(
@@ -16,20 +32,17 @@ export async function planWalk(
   to: LngLat,
   time: number
 ): Promise<PlanWalkResponse> {
-  const r = await fetch("/api/plan-walk", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ from, to, time }),
-  });
-  if (!r.ok) throw new Error(`plan-walk ${r.status}`);
-  return r.json();
+  if (!graphReady) throw new Error("graph not loaded");
+  const routes = findThreeRoutes(from, to, time);
+  return { routes, computed_at_time: time };
 }
 
 export async function describeSegment(
   id: string,
   time: number
 ): Promise<DescribeSegmentResponse> {
-  const r = await fetch(`/api/describe-segment/${id}?time=${time}`);
-  if (!r.ok) throw new Error(`describe ${r.status}`);
-  return r.json();
+  if (!graphReady) throw new Error("graph not loaded");
+  const result = describeLocal(id, time);
+  if (!result) throw new Error("edge not found");
+  return result as DescribeSegmentResponse;
 }

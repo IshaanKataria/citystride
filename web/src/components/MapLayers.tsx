@@ -98,7 +98,7 @@ export function MapLayers() {
             getSize: 22,
             getColor: [11, 15, 20, 255],
             background: true,
-            getBackgroundColor: (d: any) => [...d.color, 255],
+            getBackgroundColor: ((d: any) => [d.color[0], d.color[1], d.color[2], 255]) as any,
             backgroundPadding: [8, 4],
             fontWeight: 700,
             pickable: false,

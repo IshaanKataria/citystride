@@ -17,3 +17,4 @@ bake/output/
 bake/data/
 *.graph.json
 *.graph.bin
+.vercel
