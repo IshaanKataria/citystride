@@ -21,12 +21,25 @@ const LazyExplainSlideOut = lazy(() =>
 );
 
 export const loader = async () => {
-  const graph = await loadGraphArtifact("data/graph.json");
-  return { graph };
+  try {
+    const graph = await loadGraphArtifact("data/graph.json");
+    return { graph };
+  } catch {
+    return { graph: null };
+  }
 };
 
-const MapView = () => {
-  const { graph } = useLoaderData<{ graph: GraphArtifact }>();
+const NoDataView = () => (
+  <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-950 text-white gap-4">
+    <h1 className="text-3xl font-bold">CityStride</h1>
+    <p className="text-muted-foreground text-center max-w-md">
+      No graph data found. Run <code className="bg-gray-800 px-2 py-0.5 rounded text-sm">npm run ingest</code> to
+      fetch City of Melbourne data and build the graph artifact.
+    </p>
+  </div>
+);
+
+const MapWithData = ({ graph }: { graph: GraphArtifact }) => {
   const {
     state,
     setTime,
@@ -127,7 +140,13 @@ const MapView = () => {
 };
 
 const IndexRoute = () => {
-  return <MapView />;
+  const { graph } = useLoaderData<{ graph: GraphArtifact | null }>();
+
+  if (!graph) {
+    return <NoDataView />;
+  }
+
+  return <MapWithData graph={graph} />;
 };
 
 export default IndexRoute;
