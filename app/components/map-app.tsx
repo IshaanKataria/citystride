@@ -1,15 +1,17 @@
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { PathLayer } from "@deck.gl/layers";
+import { PathLayer, ScatterplotLayer } from "@deck.gl/layers";
 
 import { computeScore } from "~/lib/scoring";
 import { scoreToColor, ROUTE_COLORS } from "~/lib/colors";
 import { computeRoutes } from "~/lib/routing";
 import { formatHourOfWeek, INITIAL_HOUR_OF_WEEK } from "~/lib/time";
-import type { GraphArtifact, GraphEdge, Route } from "~/lib/types";
+import type { GraphArtifact, GraphEdge, Route, Event } from "~/lib/types";
 import { useAppState } from "~/hooks/use-app-state";
+import { findNearestNode } from "~/lib/graph";
+import { activeEventsAt } from "~/lib/events";
 
 // ─── MapTooltip ─────────────────────────────────────────────────
 const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: number; time: number }) => {
@@ -481,6 +483,14 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
     isStale,
   } = useAppState();
 
+  const FLINDERS_LNG = 144.967;
+  const FLINDERS_LAT = -37.8183;
+
+  const flindersNodeId = useMemo(
+    () => findNearestNode(graph.nodes, FLINDERS_LNG, FLINDERS_LAT).id,
+    [graph.nodes],
+  );
+
   // time/routes/etc. live in state; keep transient UI state local.
   const time = state.time;
   const routes = (state.routes as Route[] | null);
@@ -532,8 +542,47 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
         }));
       }
     }
+    if (mode === "event" && graph.events && graph.events.length > 0) {
+      const active = activeEventsAt(graph.events, time);
+
+      if (selectedEventId) {
+        const selected = active.filter((ev) => ev.id === selectedEventId);
+        layers.push(
+          new ScatterplotLayer<Event>({
+            id: "event-rings",
+            data: selected as Event[],
+            getPosition: (ev) => [ev.position[0], ev.position[1]],
+            getRadius: 16,
+            getFillColor: [251, 191, 36, 60],
+            getLineColor: [251, 191, 36, 230],
+            getLineWidth: 2,
+            radiusUnits: "pixels",
+            lineWidthUnits: "pixels",
+            stroked: true,
+            pickable: false,
+          }),
+        );
+      }
+
+      layers.push(
+        new ScatterplotLayer<Event>({
+          id: "event-markers",
+          data: active as Event[],
+          getPosition: (ev) => [ev.position[0], ev.position[1]],
+          getRadius: 8,
+          getFillColor: [251, 191, 36, 240],
+          getLineColor: [11, 15, 20, 230],
+          getLineWidth: 2,
+          radiusUnits: "pixels",
+          lineWidthUnits: "pixels",
+          stroked: true,
+          pickable: true,
+        }),
+      );
+    }
+
     return layers;
-  }, [graph, time, routes]);
+  }, [graph, time, routes, mode, selectedEventId]);
 
   // ── Init MapLibre + Deck.gl overlay ──
   useEffect(() => {
@@ -561,6 +610,10 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
         }
       },
       onClick: (info) => {
+        if (info.object && (info.object as any).resolved_via !== undefined) {
+          handleEventClickRef.current(info.object as Event);
+          return;
+        }
         if (info.object) {
           setPinnedEdge(info.object as GraphEdge);
         } else {
@@ -596,6 +649,20 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
       setIsComputing(false);
     });
   }, [graph, time, setRoutesInState]);
+
+  const handleEventClick = useCallback((ev: Event) => {
+    const toNode = findNearestNode(graph.nodes, ev.position[0], ev.position[1]).id;
+    setSelectedEvent(ev.id);
+    setIsComputing(true);
+    requestAnimationFrame(() => {
+      const result = computeRoutes(graph.nodes, graph.edges, flindersNodeId, toNode, time);
+      setRoutesInState(result, time);
+      setIsComputing(false);
+    });
+  }, [graph, time, flindersNodeId, setSelectedEvent, setRoutesInState]);
+
+  const handleEventClickRef = useRef(handleEventClick);
+  useEffect(() => { handleEventClickRef.current = handleEventClick; }, [handleEventClick]);
 
   const handleRecompute = useCallback(() => {
     if (routes && routes.length > 0) {
