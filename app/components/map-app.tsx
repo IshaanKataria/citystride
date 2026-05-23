@@ -28,6 +28,44 @@ const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: numbe
   );
 };
 
+// ─── EventDetailCard ────────────────────────────────────────────
+function formatEventDateRange(start: string, end: string): string {
+  const fmt = (iso: string) =>
+    new Date(iso + "T00:00:00Z").toLocaleDateString("en-AU", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      timeZone: "UTC",
+    });
+  return start === end ? fmt(start) : `${fmt(start)} → ${fmt(end)}`;
+}
+
+const EventDetailCard = ({ event, onClose }: { event: import("~/lib/types").Event; onClose: () => void }) => (
+  <div className="absolute bottom-24 left-4 z-30 w-80 rounded-lg bg-gray-900/95 p-4 shadow-lg backdrop-blur">
+    <div className="flex items-start justify-between gap-2">
+      <div className="min-w-0">
+        <h3 className="font-medium text-white leading-tight">{event.name}</h3>
+        <p className="text-xs text-amber-400 mt-1">
+          {formatEventDateRange(event.start_date, event.end_date)}
+        </p>
+      </div>
+      <button onClick={onClose} className="text-gray-400 hover:text-white text-lg leading-none flex-shrink-0">&times;</button>
+    </div>
+    <p className="mt-2 text-xs text-gray-400">
+      {event.venue_name}{event.address ? ` · ${event.address}` : ""}
+    </p>
+    <p className="mt-3 text-xs text-gray-300 leading-relaxed">{event.description}</p>
+    <a
+      href={event.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-3 inline-block text-xs text-blue-400 underline hover:text-blue-300"
+    >
+      Open page →
+    </a>
+  </div>
+);
+
 // ─── InspectorCard ──────────────────────────────────────────────
 const MetricBar = ({ label, value, rawLabel }: { label: string; value: number; rawLabel: string }) => (
   <div className="flex items-center gap-2">
@@ -714,7 +752,15 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
         onRecompute={handleRecompute}
       />
 
-      {pinnedEdge && <InspectorCard edge={pinnedEdge} time={time} onClose={() => setPinnedEdge(null)} />}
+      {selectedEventId && graph.events && (() => {
+        const ev = graph.events.find((e) => e.id === selectedEventId);
+        if (!ev) return null;
+        return <EventDetailCard event={ev} onClose={() => { setSelectedEvent(null); clearRoutesInState(); }} />;
+      })()}
+
+      {!selectedEventId && pinnedEdge && (
+        <InspectorCard edge={pinnedEdge} time={time} onClose={() => setPinnedEdge(null)} />
+      )}
       {explainRoute && (
         <ExplainSlideOut
           route={explainRoute}
