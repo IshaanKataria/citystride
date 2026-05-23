@@ -15,6 +15,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>CityStride — Melbourne Walkability</title>
+        <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" />
         <Meta />
         <Links />
       </head>

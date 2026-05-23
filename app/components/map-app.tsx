@@ -7,9 +7,8 @@ import { PathLayer } from "@deck.gl/layers";
 import { computeScore } from "~/lib/scoring";
 import { scoreToColor, ROUTE_COLORS } from "~/lib/colors";
 import { computeRoutes } from "~/lib/routing";
-import { createGeocoder } from "~/lib/geocoder";
 import { formatHourOfWeek, INITIAL_HOUR_OF_WEEK } from "~/lib/time";
-import type { GraphArtifact, GraphEdge, Route, AddressRecord } from "~/lib/types";
+import type { GraphArtifact, GraphEdge, Route } from "~/lib/types";
 
 // ─── MapTooltip ─────────────────────────────────────────────────
 const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: number; time: number }) => {
@@ -19,7 +18,7 @@ const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: numbe
       className="pointer-events-none absolute z-50 rounded-md bg-gray-900 px-3 py-2 text-sm text-white shadow-lg"
       style={{ left: x + 12, top: y - 12 }}
     >
-      <div className="font-medium">{edge.street_name}</div>
+      <div className="font-medium">{edge.name}</div>
       <div className="text-gray-400">Score: {(score * 100).toFixed(0)}</div>
     </div>
   );
@@ -43,23 +42,23 @@ const InspectorCard = ({ edge, time, onClose }: { edge: GraphEdge; time: number;
     <div className="absolute bottom-24 left-4 z-30 w-72 rounded-lg bg-gray-900/95 p-4 shadow-lg backdrop-blur">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-medium text-white">{edge.street_name}</h3>
+          <h3 className="font-medium text-white">{edge.name}</h3>
           <p className="text-sm text-blue-400">{(score * 100).toFixed(0)} / 100</p>
         </div>
         <button onClick={onClose} className="text-gray-400 hover:text-white text-lg leading-none">&times;</button>
       </div>
       <div className="mt-3 space-y-2">
         <MetricBar label="Lighting" value={m.lux} rawLabel={`${(m.lux * 100).toFixed(0)}%`} />
-        <MetricBar label="Foot traffic" value={m.ped_count[time]} rawLabel={`${(m.ped_count[time] * 100).toFixed(0)}%`} />
-        <MetricBar label="Gradient" value={m.gentle_gradient} rawLabel={`${(m.gentle_gradient * 100).toFixed(0)}%`} />
-        <MetricBar label="Surface" value={m.surface_quality} rawLabel={`${(m.surface_quality * 100).toFixed(0)}%`} />
+        <MetricBar label="Foot traffic" value={m.ped_vector[time]} rawLabel={`${(m.ped_vector[time] * 100).toFixed(0)}%`} />
+        <MetricBar label="Steepness" value={m.steepness} rawLabel={`${(m.steepness * 100).toFixed(0)}%`} />
+        <MetricBar label="Surface" value={m.surface} rawLabel={`${(m.surface * 100).toFixed(0)}%`} />
         <MetricBar label="Canopy" value={m.canopy} rawLabel={`${(m.canopy * 100).toFixed(0)}%`} />
-        <MetricBar label="Transit" value={m.bailout_proximity} rawLabel={`${(m.bailout_proximity * 100).toFixed(0)}%`} />
-        <MetricBar label="Venues" value={m.open_venues[time]} rawLabel={`${(m.open_venues[time] * 100).toFixed(0)}%`} />
+        <MetricBar label="Transit" value={m.transit} rawLabel={`${(m.transit * 100).toFixed(0)}%`} />
+        <MetricBar label="Venues" value={m.venues_vector[time]} rawLabel={`${(m.venues_vector[time] * 100).toFixed(0)}%`} />
       </div>
-      {edge.confidence.ped_count.distance_to_sensor_m > 150 && (
+      {m.ped_confidence.nearest_sensor_m !== null && m.ped_confidence.nearest_sensor_m > 150 && (
         <p className="mt-2 text-xs text-gray-500">
-          Estimated: {edge.confidence.ped_count.distance_to_sensor_m}m to nearest sensor
+          Estimated: {m.ped_confidence.nearest_sensor_m}m to nearest sensor
         </p>
       )}
     </div>
@@ -96,10 +95,10 @@ const ScoreLegend = () => (
   <div className="absolute right-4 top-4 z-30 rounded-lg bg-gray-900/90 px-4 py-3 shadow-lg backdrop-blur">
     <div className="flex items-center gap-2">
       <span className="text-xs text-gray-400">Lower score</span>
-      <div className="h-3 w-32 rounded-sm" style={{ background: "linear-gradient(to right, rgb(80,80,80), rgb(0,200,120))" }} />
+      <div className="h-3 w-32 rounded-sm" style={{ background: "linear-gradient(to right, rgb(220,50,50), rgb(250,200,50), rgb(50,205,100))" }} />
       <span className="text-xs text-gray-400">Higher score</span>
     </div>
-    <p className="mt-1 text-xs text-gray-400 max-w-[280px]">Score reflects lighting, foot traffic, gradient, surface, transit and canopy at the selected time.</p>
+    <p className="mt-1 text-xs text-gray-400 max-w-[280px]">Score reflects lighting, foot traffic, steepness, surface, transit and canopy at the selected time.</p>
     <p className="mt-1 text-xs text-gray-500">Data: City of Melbourne open data.</p>
   </div>
 );
@@ -125,42 +124,57 @@ const TimeSlider = ({ time, onTimeChange, isStale, routeComputedAt, onRecompute 
 // ─── PlanWalkPanel ──────────────────────────────────────────────
 const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExplain }: {
   graph: GraphArtifact; routes: readonly Route[] | null; isComputing: boolean;
-  onFindRoute: (from: string, to: string) => void; onClear: () => void; onExplain: (id: number) => void;
+  onFindRoute: (from: number, to: number) => void; onClear: () => void; onExplain: (id: number) => void;
 }) => {
-  const geocoderRef = useRef(createGeocoder(graph.addresses));
   const [fromText, setFromText] = useState("");
   const [toText, setToText] = useState("");
-  const [fromMatch, setFromMatch] = useState<AddressRecord | null>(null);
-  const [toMatch, setToMatch] = useState<AddressRecord | null>(null);
-  const [fromSugg, setFromSugg] = useState<readonly AddressRecord[]>([]);
-  const [toSugg, setToSugg] = useState<readonly AddressRecord[]>([]);
+  const [fromNode, setFromNode] = useState<number | null>(null);
+  const [toNode, setToNode] = useState<number | null>(null);
+  const [fromSugg, setFromSugg] = useState<readonly GraphEdge[]>([]);
+  const [toSugg, setToSugg] = useState<readonly GraphEdge[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const searchStreets = useCallback((query: string): readonly GraphEdge[] => {
+    if (query.length < 2) return [];
+    const q = query.toLowerCase();
+    const seen = new Set<string>();
+    const results: GraphEdge[] = [];
+    for (const edge of graph.edges) {
+      if (!edge.name || seen.has(edge.name)) continue;
+      if (edge.name.toLowerCase().includes(q)) {
+        seen.add(edge.name);
+        results.push(edge);
+        if (results.length >= 5) break;
+      }
+    }
+    return results;
+  }, [graph.edges]);
 
   return (
     <div className="absolute left-4 top-4 z-30 w-72 rounded-lg bg-gray-900/95 p-4 shadow-lg backdrop-blur">
       <h2 className="text-sm font-semibold text-white mb-3">Plan a Walk</h2>
       <div className="space-y-2">
         <div className="relative">
-          <input type="text" placeholder="From address..." value={fromText}
-            onChange={(e) => { setFromText(e.target.value); setFromMatch(null); setError(null); setFromSugg(e.target.value.length >= 2 ? geocoderRef.current.search(e.target.value) : []); }}
+          <input type="text" placeholder="From street..." value={fromText}
+            onChange={(e) => { setFromText(e.target.value); setFromNode(null); setError(null); setFromSugg(searchStreets(e.target.value)); }}
             className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none" />
           {fromSugg.length > 0 && (
             <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-700 shadow-lg">
-              {fromSugg.map((a) => <li key={a.address}><button onClick={() => { setFromText(a.address); setFromMatch(a); setFromSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700">{a.address}</button></li>)}
+              {fromSugg.map((e) => <li key={e.id}><button onClick={() => { setFromText(e.name); setFromNode(e.fromNodeId); setFromSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700">{e.name}</button></li>)}
             </ul>
           )}
         </div>
         <div className="relative">
-          <input type="text" placeholder="To address..." value={toText}
-            onChange={(e) => { setToText(e.target.value); setToMatch(null); setError(null); setToSugg(e.target.value.length >= 2 ? geocoderRef.current.search(e.target.value) : []); }}
+          <input type="text" placeholder="To street..." value={toText}
+            onChange={(e) => { setToText(e.target.value); setToNode(null); setError(null); setToSugg(searchStreets(e.target.value)); }}
             className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none" />
           {toSugg.length > 0 && (
             <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-700 shadow-lg">
-              {toSugg.map((a) => <li key={a.address}><button onClick={() => { setToText(a.address); setToMatch(a); setToSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700">{a.address}</button></li>)}
+              {toSugg.map((e) => <li key={e.id}><button onClick={() => { setToText(e.name); setToNode(e.fromNodeId); setToSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-white hover:bg-gray-700">{e.name}</button></li>)}
             </ul>
           )}
         </div>
-        <button onClick={() => { if (!fromMatch || !toMatch) { setError("Please select valid addresses."); return; } onFindRoute(fromMatch.nearestNodeId, toMatch.nearestNodeId); }}
+        <button onClick={() => { if (fromNode === null || toNode === null) { setError("Please select valid streets."); return; } onFindRoute(fromNode, toNode); }}
           disabled={isComputing} className="w-full rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
           {isComputing ? "Computing..." : "Find route"}
         </button>
@@ -310,9 +324,12 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-      center: [144.963, -37.814],
+      center: [144.965, -37.816],
       zoom: 15,
-      antialias: true,
+    });
+
+    map.on("error", (e) => {
+      console.error("MapLibre error:", e);
     });
 
     const overlay = new MapboxOverlay({
@@ -336,6 +353,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
 
     map.on("load", () => {
       map.addControl(overlay as unknown as maplibregl.IControl);
+      overlay.setProps({ layers: getLayers() });
     });
 
     mapRef.current = map;
@@ -352,7 +370,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   }, [getLayers]);
 
   // ── Route computation ──
-  const handleFindRoute = useCallback((fromNode: string, toNode: string) => {
+  const handleFindRoute = useCallback((fromNode: number, toNode: number) => {
     setIsComputing(true);
     requestAnimationFrame(() => {
       const result = computeRoutes(graph.nodes, graph.edges, fromNode, toNode, time);
@@ -377,7 +395,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
       {/* Map canvas */}
-      <div ref={containerRef} className="absolute inset-0" />
+      <div ref={containerRef} className="absolute inset-0 z-0" style={{ width: "100%", height: "100%" }} />
 
       {/* Hover tooltip */}
       {hoveredEdge && <MapTooltip edge={hoveredEdge.edge} x={hoveredEdge.x} y={hoveredEdge.y} time={time} />}

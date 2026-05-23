@@ -6,7 +6,7 @@ export const ScoreLegend = () => {
         <div
           className="h-3 w-32 rounded-sm"
           style={{
-            background: "linear-gradient(to right, rgb(80,80,80), rgb(0,200,120))",
+            background: "linear-gradient(to right, rgb(220,50,50), rgb(250,200,50), rgb(50,205,100))",
           }}
         />
         <span className="text-xs text-muted-foreground">Higher score</span>

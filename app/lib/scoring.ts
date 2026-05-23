@@ -2,12 +2,12 @@ import type { EdgeMetrics } from "./types";
 
 export const WEIGHTS = {
   lux: 0.25,
-  ped_count: 0.20,
-  gentle_gradient: 0.10,
-  surface_quality: 0.10,
+  ped_vector: 0.20,
+  steepness: 0.10,
+  surface: 0.10,
   canopy: 0.10,
-  bailout_proximity: 0.10,
-  open_venues: 0.15,
+  transit: 0.10,
+  venues_vector: 0.15,
 } as const;
 
 export const ALPHA = 1.5;
@@ -15,12 +15,12 @@ export const ALPHA = 1.5;
 export const computeScore = (metrics: EdgeMetrics, hourOfWeek: number): number => {
   return (
     WEIGHTS.lux * metrics.lux +
-    WEIGHTS.ped_count * metrics.ped_count[hourOfWeek] +
-    WEIGHTS.gentle_gradient * metrics.gentle_gradient +
-    WEIGHTS.surface_quality * metrics.surface_quality +
+    WEIGHTS.ped_vector * metrics.ped_vector[hourOfWeek] +
+    WEIGHTS.steepness * metrics.steepness +
+    WEIGHTS.surface * metrics.surface +
     WEIGHTS.canopy * metrics.canopy +
-    WEIGHTS.bailout_proximity * metrics.bailout_proximity +
-    WEIGHTS.open_venues * metrics.open_venues[hourOfWeek]
+    WEIGHTS.transit * metrics.transit +
+    WEIGHTS.venues_vector * metrics.venues_vector[hourOfWeek]
   );
 };
 

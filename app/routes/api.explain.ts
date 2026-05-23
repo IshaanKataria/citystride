@@ -19,13 +19,13 @@ Rules:
 - Do not mention crime, danger, or safety concerns.`;
 
   const edgeSummaries = route.edges.slice(0, 10).map((e) => ({
-    street: e.street_name,
+    street: e.name,
     length: e.length_m,
     lux: (e.metrics.lux * 100).toFixed(0),
-    traffic: (e.metrics.ped_count[time] * 100).toFixed(0),
+    traffic: (e.metrics.ped_vector[time] * 100).toFixed(0),
     canopy: (e.metrics.canopy * 100).toFixed(0),
-    surface: (e.metrics.surface_quality * 100).toFixed(0),
-    transit: (e.metrics.bailout_proximity * 100).toFixed(0),
+    surface: (e.metrics.surface * 100).toFixed(0),
+    transit: (e.metrics.transit * 100).toFixed(0),
   }));
 
   const userPrompt = `Explain why Route ${route.id} (score: ${(route.score * 100).toFixed(0)}/100, length: ${route.length_m}m) is recommended.
