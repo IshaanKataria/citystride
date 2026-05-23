@@ -86,25 +86,25 @@ export async function streamExplanation(route: Route, time: number, res: Respons
     const userMessage = await buildUserMessage(route, time);
 
     const stream = anthropic.messages.stream({
-      model: "claude-sonnet-4-5",
+      model: "claude-sonnet-4-6",
       max_tokens: 600,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],
     });
 
-    for await (const event of stream) {
-      if (
-        event.type === "content_block_delta" &&
-        event.delta.type === "text_delta"
-      ) {
-        res.write(`data: ${JSON.stringify({ delta: event.delta.text })}\n\n`);
-      }
-    }
+    stream.on("text", (text: string) => {
+      res.write(`data: ${JSON.stringify({ delta: text })}\n\n`);
+    });
+
+    await stream.finalMessage();
 
     res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
     res.end();
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : "no stack";
+    console.error("EXPLAIN ERROR:", msg);
+    console.error("STACK:", stack);
     res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
     res.end();
   }

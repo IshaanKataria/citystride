@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, openSync, readSync, closeSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import createGraph, { type Graph } from "ngraph.graph";
@@ -10,9 +10,25 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Try teammate's real data first, then fall back to my mock
 const CANDIDATE_PATHS = [
   process.env.GRAPH_FILE,
-  join(__dirname, "..", "..", "data", "graph.json"),
   join(__dirname, "..", "..", "bake", "output", "graph.json"),
+  join(__dirname, "..", "..", "web", "public", "graph.json"),
+  join(__dirname, "..", "..", "data", "graph.json"),
 ].filter(Boolean) as string[];
+
+function isUsableGraphFile(path: string): boolean {
+  if (!existsSync(path)) return false;
+  // Reject git-LFS pointer files (they start with "version https://git-lfs.github.com/spec/...")
+  try {
+    const fd = openSync(path, "r");
+    const buf = Buffer.alloc(64);
+    readSync(fd, buf, 0, 64, 0);
+    closeSync(fd);
+    if (buf.toString("utf-8").startsWith("version https://git-lfs")) return false;
+  } catch {
+    return false;
+  }
+  return true;
+}
 
 let cached: {
   artifact: GraphArtifact;
@@ -94,7 +110,7 @@ export async function loadGraph() {
 
   let chosenPath: string | null = null;
   for (const p of CANDIDATE_PATHS) {
-    if (existsSync(p)) {
+    if (isUsableGraphFile(p)) {
       chosenPath = p;
       break;
     }
