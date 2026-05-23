@@ -35,12 +35,26 @@ export type Node = {
   position: LngLat;
 };
 
+export type Event = {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  start_date: string;
+  end_date: string;
+  venue_name: string;
+  address: string | null;
+  position: LngLat;
+  resolved_via: "venues_json" | "alias_then_venues_json";
+};
+
 export type GraphArtifact = {
   version: string;
   built_at: string;
   bbox: [number, number, number, number];
   nodes: Node[];
   edges: Edge[];
+  events?: Event[];
 };
 
 export type RouteSegment = {
