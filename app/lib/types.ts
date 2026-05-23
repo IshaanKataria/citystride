@@ -41,6 +41,7 @@ export interface GraphArtifact {
   readonly meta: GraphMeta;
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly GraphEdge[];
+  readonly events?: readonly Event[];
 }
 
 export interface ScoredEdge {
@@ -56,6 +57,21 @@ export interface Route {
   readonly length_m: number;
 }
 
+export interface Event {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly url: string;
+  readonly start_date: string;
+  readonly end_date: string;
+  readonly venue_name: string;
+  readonly address: string | null;
+  readonly position: readonly [number, number];
+  readonly resolved_via: "venues_json" | "alias_then_venues_json";
+}
+
+export type Mode = "walk" | "event";
+
 export interface AppState {
   readonly viewport: { readonly lng: number; readonly lat: number; readonly zoom: number };
   readonly time: number;
@@ -67,4 +83,6 @@ export interface AppState {
   readonly routeComputedAt: number | null;
   readonly pinnedSegmentId: string | null;
   readonly openExplanationRouteId: number | null;
+  readonly mode: Mode;
+  readonly selectedEventId: string | null;
 }
