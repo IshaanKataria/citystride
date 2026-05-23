@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
 import { INITIAL_HOUR_OF_WEEK } from "~/lib/time";
-import type { AppState, Route } from "~/lib/types";
+import type { AppState, Mode, Route } from "~/lib/types";
 
 const INITIAL_STATE: AppState = {
   viewport: { lng: 144.963, lat: -37.814, zoom: 15 },
@@ -11,6 +11,8 @@ const INITIAL_STATE: AppState = {
   routeComputedAt: null,
   pinnedSegmentId: null,
   openExplanationRouteId: null,
+  mode: "walk",
+  selectedEventId: null,
 };
 
 export const useAppState = () => {
@@ -38,6 +40,7 @@ export const useAppState = () => {
       routes: null,
       routeQuery: null,
       routeComputedAt: null,
+      selectedEventId: null,
     }));
   }, []);
 
@@ -50,6 +53,23 @@ export const useAppState = () => {
 
   const setOpenExplanation = useCallback((routeId: number | null) => {
     setState((prev) => ({ ...prev, openExplanationRouteId: routeId }));
+  }, []);
+
+  const setMode = useCallback((mode: Mode) => {
+    setState((prev) => ({
+      ...prev,
+      mode,
+      routes: null,
+      routeQuery: null,
+      routeComputedAt: null,
+      selectedEventId: null,
+      openExplanationRouteId: null,
+      pinnedSegmentId: null,
+    }));
+  }, []);
+
+  const setSelectedEvent = useCallback((selectedEventId: string | null) => {
+    setState((prev) => ({ ...prev, selectedEventId }));
   }, []);
 
   const isStale =
@@ -65,6 +85,8 @@ export const useAppState = () => {
     clearRoutes,
     setRouteQuery,
     setOpenExplanation,
+    setMode,
+    setSelectedEvent,
     isStale,
   };
 };
