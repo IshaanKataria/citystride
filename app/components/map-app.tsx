@@ -169,20 +169,38 @@ const ScoreLegend = () => (
 );
 
 // ─── TimeSlider ─────────────────────────────────────────────────
-const TimeSlider = ({ time, onTimeChange, isStale, routeComputedAt, onRecompute }: {
-  time: number; onTimeChange: (t: number) => void; isStale: boolean; routeComputedAt: number | null; onRecompute: () => void;
+const TimeSlider = ({
+  time, onTimeChange, isStale, routeComputedAt, onRecompute, eventsTodayCount,
+}: {
+  time: number;
+  onTimeChange: (t: number) => void;
+  isStale: boolean;
+  routeComputedAt: number | null;
+  onRecompute: () => void;
+  eventsTodayCount?: number | null;
 }) => (
-  <div className="absolute bottom-6 left-1/2 z-30 -translate-x-1/2 rounded-lg bg-gray-900/90 px-6 py-3 shadow-lg backdrop-blur">
-    <div className="flex items-center gap-4">
-      <span className="text-sm font-medium text-white min-w-[80px]">{formatHourOfWeek(time)}</span>
-      <input type="range" min={0} max={167} value={time} onChange={(e) => onTimeChange(parseInt(e.target.value, 10))} className="w-64 accent-blue-500" />
-    </div>
-    {isStale && routeComputedAt !== null && (
-      <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
-        <span>Routes computed for {formatHourOfWeek(routeComputedAt)}</span>
-        <button onClick={onRecompute} className="text-blue-400 underline hover:text-blue-300">Recompute</button>
+  <div className="absolute bottom-6 left-1/2 z-30 -translate-x-1/2 flex flex-col items-center gap-1">
+    {eventsTodayCount !== null && eventsTodayCount !== undefined && eventsTodayCount > 0 && (
+      <div className="rounded-full bg-amber-500/20 px-3 py-1 text-xs text-amber-300 ring-1 ring-amber-500/40">
+        {eventsTodayCount} {eventsTodayCount === 1 ? "event" : "events"} today
       </div>
     )}
+    <div className="rounded-lg bg-gray-900/90 px-6 py-3 shadow-lg backdrop-blur">
+      <div className="flex items-center gap-4">
+        <span className="text-sm font-medium text-white min-w-[80px]">{formatHourOfWeek(time)}</span>
+        <input
+          type="range" min={0} max={167} value={time}
+          onChange={(e) => onTimeChange(parseInt(e.target.value, 10))}
+          className="w-64 accent-blue-500"
+        />
+      </div>
+      {isStale && routeComputedAt !== null && (
+        <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
+          <span>Routes computed for {formatHourOfWeek(routeComputedAt)}</span>
+          <button onClick={onRecompute} className="text-blue-400 underline hover:text-blue-300">Recompute</button>
+        </div>
+      )}
+    </div>
   </div>
 );
 
@@ -541,6 +559,11 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   const [isComputing, setIsComputing] = useState(false);
   const [explainRoute, setExplainRoute] = useState<Route | null>(null);
 
+  const eventsTodayCount = useMemo(() => {
+    if (mode !== "event" || !graph.events) return null;
+    return activeEventsAt(graph.events, time).length;
+  }, [mode, graph.events, time]);
+
   // ── Build Deck.gl layers ──
   const getLayers = useCallback(() => {
     const hasRoutes = routes && routes.length > 0;
@@ -750,6 +773,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
         isStale={isStale}
         routeComputedAt={routeComputedAt}
         onRecompute={handleRecompute}
+        eventsTodayCount={eventsTodayCount}
       />
 
       {selectedEventId && graph.events && (() => {
