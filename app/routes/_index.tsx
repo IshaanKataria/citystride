@@ -12,12 +12,8 @@ import { useRouteComputation } from "~/hooks/use-routes";
 import { loadGraphArtifact } from "~/lib/graph";
 import type { GraphArtifact, GraphEdge } from "~/lib/types";
 
-const LazyCityMap = lazy(() =>
-  import("~/components/map/city-map").then((m) => ({ default: m.CityMap }))
-);
-const LazyExplainSlideOut = lazy(() =>
-  import("~/components/explain/explain-slide-out").then((m) => ({ default: m.ExplainSlideOut }))
-);
+const LazyCityMap = lazy(() => import("~/components/map/city-map.client"));
+const LazyExplainSlideOut = lazy(() => import("~/components/explain/explain-slide-out.client"));
 
 const useIsClient = () => {
   const [isClient, setIsClient] = useState(false);
@@ -81,7 +77,7 @@ const MapWithData = ({ graph }: { graph: GraphArtifact }) => {
   return (
     <GraphProvider value={graph}>
       <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
-        {isClient ? (
+        {isClient && (
           <Suspense fallback={<div className="absolute inset-0 bg-gray-950" />}>
             <LazyCityMap
               time={state.time}
@@ -91,10 +87,6 @@ const MapWithData = ({ graph }: { graph: GraphArtifact }) => {
               onClickSegment={handleClickSegment}
             />
           </Suspense>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-950">
-            <p className="text-muted-foreground">Loading map...</p>
-          </div>
         )}
 
         <GhostTabs />
