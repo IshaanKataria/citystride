@@ -1,7 +1,7 @@
 # Events Feature — Design Spec
 
 **Date:** 2026-05-23
-**Status:** Approved for implementation
+**Status:** Implemented
 **Author:** Ryan Sinnott + Claude (pair)
 
 ## Goal
