@@ -8,34 +8,34 @@ export const action = async ({ request }: { request: Request }) => {
 
   const client = new Anthropic();
 
-  const systemPrompt = `You are a walking route advisor for Melbourne, Australia. You explain why a specific walking route was recommended by the CityStride app.
+  const systemPrompt = `You are a walking route advisor for Melbourne. Explain a recommended walking route in 2 short paragraphs, around 80 words total.
 
 Rules:
-- Use positive framing only. Describe what makes the route good, never what makes alternatives bad.
-- Reference specific numbers from the route data (scores, distances, metrics).
-- Acknowledge any data limitations (e.g., estimated pedestrian counts).
-- Keep the explanation to 4-6 paragraphs, ~250 words max.
-- Use descriptive language like "well-lit," "lively," "tree-lined" — never "safe" or "avoid."
-- Do not mention crime, danger, or safety concerns.`;
+- Open with the headline: distance, score, and the one most striking quality (canopy, lighting, foot traffic, or transit).
+- Second paragraph: name one or two specific streets and tie a real number to each ("Flinders Lane has 100% canopy").
+- Positive framing only. Never use "safe", "avoid", or warn about alternatives.
+- No "Note:" footnotes. No bullet points. No headings. Just two tight paragraphs.`;
 
-  const edgeSummaries = route.edges.slice(0, 10).map((e) => ({
+  const edgeSummaries = route.edges.slice(0, 5).map((e) => ({
     street: e.name,
-    length: e.length_m,
-    lux: (e.metrics.lux * 100).toFixed(0),
-    traffic: (e.metrics.ped_vector[time] * 100).toFixed(0),
-    canopy: (e.metrics.canopy * 100).toFixed(0),
-    surface: (e.metrics.surface * 100).toFixed(0),
-    transit: (e.metrics.transit * 100).toFixed(0),
+    length_m: Math.round(e.length_m),
+    lux: Math.round(e.metrics.lux * 100),
+    traffic: Math.round(e.metrics.ped_vector[time] * 100),
+    canopy: Math.round(e.metrics.canopy * 100),
+    surface: Math.round(e.metrics.surface * 100),
+    transit: Math.round(e.metrics.transit * 100),
   }));
 
-  const userPrompt = `Explain why Route ${route.id} (score: ${(route.score * 100).toFixed(0)}/100, length: ${route.length_m}m) is recommended.
+  const userPrompt = `Route ${route.id}: score ${(route.score * 100).toFixed(0)}/100, length ${Math.round(route.length_m)}m.
 
-Key segments:
-${JSON.stringify(edgeSummaries, null, 2)}`;
+Top segments:
+${JSON.stringify(edgeSummaries, null, 2)}
+
+Write the 2-paragraph explanation.`;
 
   const stream = await client.messages.stream({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 500,
+    model: "claude-sonnet-4-6",
+    max_tokens: 200,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
   });
