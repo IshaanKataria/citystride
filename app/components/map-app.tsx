@@ -67,26 +67,49 @@ const InspectorCard = ({ edge, time, onClose }: { edge: GraphEdge; time: number;
 };
 
 // ─── GhostTabs ──────────────────────────────────────────────────
-const GhostTabs = () => {
+type GhostTabsProps = {
+  mode: import("~/lib/types").Mode;
+  onModeChange: (m: import("~/lib/types").Mode) => void;
+};
+
+const GhostTabs = ({ mode, onModeChange }: GhostTabsProps) => {
   const [hovered, setHovered] = useState<string | null>(null);
-  const tabs = [
-    { label: "Walk", active: true },
-    { label: "Run", active: false },
-    { label: "Cycle", active: false },
-    { label: "Events", active: false },
+  const tabs: { label: string; value: "walk" | "event" | null; active: boolean }[] = [
+    { label: "Walk", value: "walk", active: true },
+    { label: "Run", value: null, active: false },
+    { label: "Cycle", value: null, active: false },
+    { label: "Events", value: "event", active: true },
   ];
   return (
     <div className="absolute top-4 left-1/2 z-30 -translate-x-1/2 flex rounded-lg bg-gray-900/90 p-1 shadow-lg backdrop-blur">
-      {tabs.map((tab) => (
-        <div key={tab.label} className="relative" onMouseEnter={() => !tab.active && setHovered(tab.label)} onMouseLeave={() => setHovered(null)}>
-          <button disabled={!tab.active} className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${tab.active ? "bg-blue-600 text-white" : "text-gray-400 cursor-not-allowed"}`}>
-            {tab.label}
-          </button>
-          {hovered === tab.label && (
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-gray-400 shadow">Coming soon</div>
-          )}
-        </div>
-      ))}
+      {tabs.map((tab) => {
+        const selected = tab.value !== null && tab.value === mode;
+        return (
+          <div
+            key={tab.label}
+            className="relative"
+            onMouseEnter={() => !tab.active && setHovered(tab.label)}
+            onMouseLeave={() => setHovered(null)}
+          >
+            <button
+              disabled={!tab.active}
+              onClick={() => { if (tab.active && tab.value) onModeChange(tab.value); }}
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+                selected
+                  ? "bg-blue-600 text-white"
+                  : tab.active
+                    ? "text-gray-300 hover:text-white"
+                    : "text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              {tab.label}
+            </button>
+            {hovered === tab.label && !tab.active && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-gray-400 shadow">Coming soon</div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -453,6 +476,8 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
     setTime,
     setRoutes: setRoutesInState,
     clearRoutes: clearRoutesInState,
+    setMode,
+    setSelectedEvent,
     isStale,
   } = useAppState();
 
@@ -460,6 +485,8 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   const time = state.time;
   const routes = (state.routes as Route[] | null);
   const routeComputedAt = state.routeComputedAt;
+  const mode = state.mode;
+  const selectedEventId = state.selectedEventId;
   const [pinnedEdge, setPinnedEdge] = useState<GraphEdge | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<{ edge: GraphEdge; x: number; y: number } | null>(null);
   const [isComputing, setIsComputing] = useState(false);
@@ -590,7 +617,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
       {hoveredEdge && <MapTooltip edge={hoveredEdge.edge} x={hoveredEdge.x} y={hoveredEdge.y} time={time} />}
 
       {/* UI overlays */}
-      <GhostTabs />
+      <GhostTabs mode={mode} onModeChange={setMode} />
       <ScoreLegend />
 
       <PlanWalkPanel
