@@ -204,54 +204,193 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
 };
 
 // ─── ExplainSlideOut ────────────────────────────────────────────
-const ExplainSlideOut = ({ route, time, onClose }: { route: Route; time: number; onClose: () => void }) => {
-  const [text, setText] = useState("");
-  const [streaming, setStreaming] = useState(false);
+
+type Highlight = {
+  icon: "tree" | "lightbulb" | "users" | "ruler" | "train" | "footprints";
+  label: string;
+  value: string;
+  compare: string;
+};
+
+type StreetPick = { name: string; detail: string };
+
+type Explanation = {
+  headline: string;
+  verdict: string;
+  highlights: Highlight[];
+  street_picks: StreetPick[];
+};
+
+const ICON_MAP: Record<Highlight["icon"], string> = {
+  tree: "🌳",
+  lightbulb: "💡",
+  users: "👥",
+  ruler: "📏",
+  train: "🚊",
+  footprints: "👣",
+};
+
+const ExplainSlideOut = ({
+  route,
+  allRoutes,
+  time,
+  onClose,
+}: {
+  route: Route;
+  allRoutes: Route[] | null;
+  time: number;
+  onClose: () => void;
+}) => {
+  const [data, setData] = useState<Explanation | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const start = useRef(Date.now());
 
   const doFetch = async () => {
-    setStreaming(true); setError(null); setText(""); start.current = Date.now();
+    setLoading(true);
+    setError(null);
+    setData(null);
+    start.current = Date.now();
     try {
-      const res = await fetch("/api/explain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route, time }) });
-      if (!res.ok) { throw new Error(`API error: ${res.status}`); }
-      const reader = res.body?.getReader();
-      if (!reader) { throw new Error("No body"); }
-      const dec = new TextDecoder();
-      let done = false;
-      while (!done) { const { value, done: d } = await reader.read(); done = d; if (value) { setText((p) => p + dec.decode(value)); } }
-    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); }
-    finally { setStreaming(false); setElapsed((Date.now() - start.current) / 1000); }
+      const res = await fetch("/api/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ route, allRoutes, time }),
+      });
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const json = (await res.json()) as Explanation | { error: string };
+      if ("error" in json) throw new Error(json.error);
+      setData(json);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setLoading(false);
+      setElapsed((Date.now() - start.current) / 1000);
+    }
   };
 
-  useEffect(() => { doFetch(); }, []);
-  useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); }; window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h); }, [onClose]);
+  useEffect(() => {
+    doFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.id]);
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
 
   const c = ROUTE_COLORS[(route.id - 1) % ROUTE_COLORS.length];
+  const accent = `rgb(${c[0]},${c[1]},${c[2]})`;
+
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-[30%] min-w-[320px] bg-gray-900 shadow-2xl overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-400">Why this route?</span>
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: `rgb(${c[0]},${c[1]},${c[2]})` }}>{route.id}</span>
+      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-[420px] max-w-[92vw] bg-gradient-to-b from-gray-950 to-gray-900 border-l border-white/10 shadow-2xl overflow-y-auto">
+        <div className="p-7 space-y-6">
+          <header className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <span
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-gray-950"
+                style={{ backgroundColor: accent }}
+              >
+                {route.id}
+              </span>
+              <span className="text-xs uppercase tracking-[0.18em] text-gray-400">Why this route?</span>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white text-lg">&times;</button>
-          </div>
-          {error ? (
-            <div className="space-y-3">
-              <p className="text-sm text-red-400">{error}</p>
-              <button onClick={doFetch} className="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700">Retry</button>
-            </div>
-          ) : (
-            <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-              {text}{streaming && <span className="animate-pulse">|</span>}
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white text-2xl leading-none"
+              aria-label="Close"
+            >
+              &times;
+            </button>
+          </header>
+
+          {loading && (
+            <div className="space-y-3 animate-pulse">
+              <div className="h-7 w-3/4 rounded bg-white/5" />
+              <div className="h-4 w-5/6 rounded bg-white/5" />
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="h-24 rounded-xl bg-white/5" />
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 pt-2">Claude is comparing the three routes…</p>
             </div>
           )}
-          {!streaming && !error && <div className="mt-6 text-xs text-gray-500">Explained by Claude &middot; {elapsed.toFixed(1)}s</div>}
+
+          {error && !loading && (
+            <div className="space-y-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+              <p className="text-sm text-red-300">Couldn't generate the pitch.</p>
+              <p className="text-xs text-red-300/60">{error}</p>
+              <button
+                onClick={doFetch}
+                className="rounded-md bg-white/10 hover:bg-white/15 px-3 py-1.5 text-xs text-white"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {data && !loading && (
+            <>
+              <div>
+                <h2 className="text-2xl font-semibold text-white leading-tight" style={{ color: accent }}>
+                  {data.headline}
+                </h2>
+                <p className="mt-2 text-sm text-gray-300 leading-relaxed">{data.verdict}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {data.highlights.map((h, i) => (
+                  <div
+                    key={i}
+                    className="rounded-xl border border-white/8 bg-white/[0.03] p-4 hover:bg-white/[0.06] transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xl">{ICON_MAP[h.icon] ?? "✦"}</span>
+                      <span className="text-[10px] uppercase tracking-wider text-gray-500">{h.label}</span>
+                    </div>
+                    <div className="text-xl font-semibold text-white tabular-nums">{h.value}</div>
+                    <div className="mt-1 text-[11px] text-gray-400">{h.compare}</div>
+                  </div>
+                ))}
+              </div>
+
+              {data.street_picks.length > 0 && (
+                <div>
+                  <h3 className="text-[10px] uppercase tracking-[0.18em] text-gray-500 mb-3">
+                    Streets you'll enjoy
+                  </h3>
+                  <div className="space-y-2">
+                    {data.street_picks.map((s, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-3 rounded-lg bg-white/[0.02] border border-white/5 p-3"
+                      >
+                        <div
+                          className="mt-1 h-2 w-2 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: accent }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-white">{s.name}</div>
+                          <div className="text-xs text-gray-400 mt-0.5">{s.detail}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-2 text-[10px] text-gray-500 uppercase tracking-wider">
+                Explained by Claude &middot; {elapsed.toFixed(1)}s
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
@@ -422,7 +561,14 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
       />
 
       {pinnedEdge && <InspectorCard edge={pinnedEdge} time={time} onClose={() => setPinnedEdge(null)} />}
-      {explainRoute && <ExplainSlideOut route={explainRoute} time={time} onClose={() => setExplainRoute(null)} />}
+      {explainRoute && (
+        <ExplainSlideOut
+          route={explainRoute}
+          allRoutes={routes}
+          time={time}
+          onClose={() => setExplainRoute(null)}
+        />
+      )}
     </div>
   );
 };
