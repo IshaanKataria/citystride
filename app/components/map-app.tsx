@@ -667,7 +667,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
       interleaved: false,
       layers: [],
       onHover: (info) => {
-        if (info.object) {
+        if (info.object && (info.object as any).metrics !== undefined) {
           setHoveredEdge({ edge: info.object as GraphEdge, x: info.x, y: info.y });
         } else {
           setHoveredEdge(null);
