@@ -1,33 +1,9 @@
-import { lazy, Suspense, useState, useEffect } from "react";
-import { useLoaderData } from "react-router";
-
-import { InspectorCard } from "~/components/inspector/inspector-card";
-import { ScoreLegend } from "~/components/legend/score-legend";
-import { PlanWalkPanel } from "~/components/planner/plan-walk-panel";
-import { TimeSlider } from "~/components/slider/time-slider";
-import { GhostTabs } from "~/components/ghosts/ghost-tabs";
-import { GraphProvider } from "~/hooks/use-graph";
-import { useAppState } from "~/hooks/use-app-state";
-import { useRouteComputation } from "~/hooks/use-routes";
-import { loadGraphArtifact } from "~/lib/graph";
-import type { GraphArtifact, GraphEdge } from "~/lib/types";
-
-const LazyCityMap = lazy(() => import("~/components/map/city-map.client"));
-const LazyExplainSlideOut = lazy(() => import("~/components/explain/explain-slide-out.client"));
-
-const useIsClient = () => {
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => { setIsClient(true); }, []);
-  return isClient;
-};
+import { useState, useEffect } from "react";
+import type { GraphArtifact } from "~/lib/types";
 
 export const loader = async () => {
-  try {
-    const graph = await loadGraphArtifact("data/graph.json");
-    return { graph };
-  } catch {
-    return { graph: null };
-  }
+  // Server loader returns null — data is loaded client-side
+  return { graph: null };
 };
 
 const NoDataView = () => (
@@ -40,104 +16,46 @@ const NoDataView = () => (
   </div>
 );
 
-const MapWithData = ({ graph }: { graph: GraphArtifact }) => {
-  const {
-    state,
-    setTime,
-    setPinnedSegment,
-    setOpenExplanation,
-    isStale,
-  } = useAppState();
-  const { routes, isComputing, compute, clear, computedAt } = useRouteComputation(graph);
-
-  const pinnedEdge = state.pinnedSegmentId
-    ? (graph.edges.find((e) => e.id === state.pinnedSegmentId) ?? null)
-    : null;
-
-  const handleClickSegment = (edge: GraphEdge | null) => {
-    setPinnedSegment(edge?.id ?? null);
-  };
-
-  const handleFindRoute = (fromNode: string, toNode: string) => {
-    compute(fromNode, toNode, state.time);
-  };
-
-  const handleRecompute = () => {
-    if (state.routeQuery) {
-      compute(state.routeQuery.fromNode, state.routeQuery.toNode, state.time);
-    }
-  };
-
-  const openExplanationRoute = state.openExplanationRouteId !== null && routes
-    ? (routes.find((r) => r.id === state.openExplanationRouteId) ?? null)
-    : null;
-
-  const isClient = useIsClient();
-
-  return (
-    <GraphProvider value={graph}>
-      <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
-        {isClient && (
-          <Suspense fallback={<div className="absolute inset-0 bg-gray-950" />}>
-            <LazyCityMap
-              time={state.time}
-              routes={routes}
-              pinnedSegmentId={state.pinnedSegmentId}
-              onHoverSegment={() => {}}
-              onClickSegment={handleClickSegment}
-            />
-          </Suspense>
-        )}
-
-        <GhostTabs />
-        <ScoreLegend />
-
-        <PlanWalkPanel
-          routes={routes}
-          isComputing={isComputing}
-          onFindRoute={handleFindRoute}
-          onClear={clear}
-          onExplain={(routeId) => setOpenExplanation(routeId)}
-        />
-
-        <TimeSlider
-          time={state.time}
-          onTimeChange={setTime}
-          isStale={isStale}
-          routeComputedAt={computedAt}
-          onRecompute={handleRecompute}
-        />
-
-        {pinnedEdge && (
-          <InspectorCard
-            edge={pinnedEdge}
-            time={state.time}
-            onClose={() => setPinnedSegment(null)}
-          />
-        )}
-
-        {isClient && openExplanationRoute && (
-          <Suspense fallback={null}>
-            <LazyExplainSlideOut
-              route={openExplanationRoute}
-              time={state.time}
-              onClose={() => setOpenExplanation(null)}
-            />
-          </Suspense>
-        )}
-      </div>
-    </GraphProvider>
-  );
-};
-
 const IndexRoute = () => {
-  const { graph } = useLoaderData<{ graph: GraphArtifact | null }>();
+  const [graph, setGraph] = useState<GraphArtifact | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [MapModule, setMapModule] = useState<any>(null);
+
+  useEffect(() => {
+    // Load graph data
+    fetch("/api/graph")
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setGraph(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load graph:", err);
+        setLoading(false);
+      });
+
+    // Dynamically import the map app (browser-only)
+    import("~/components/map-app").then((mod) => {
+      setMapModule(() => mod.MapApp);
+    });
+  }, []);
+
+  if (loading || !MapModule) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-950">
+        <p className="text-muted-foreground">Loading CityStride...</p>
+      </div>
+    );
+  }
 
   if (!graph) {
     return <NoDataView />;
   }
 
-  return <MapWithData graph={graph} />;
+  return <MapModule graph={graph} />;
 };
 
 export default IndexRoute;

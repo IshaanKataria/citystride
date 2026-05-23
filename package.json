@@ -7,7 +7,10 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "ingest": "tsx scripts/ingest/index.ts"
+    "ingest": "tsx scripts/ingest/index.ts",
+    "bake": "node scripts/bake/bake.js",
+    "adapt": "tsx scripts/adapt-bake.ts",
+    "bake:full": "npm run bake && npm run adapt"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",
@@ -25,6 +28,7 @@
     "maplibre-gl": "^5.24.0",
     "ngraph.graph": "^20.1.2",
     "ngraph.path": "^1.6.1",
+    "rbush": "^4.0.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router": "7.15.1",

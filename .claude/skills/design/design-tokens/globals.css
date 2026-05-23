@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+/* ==================== PRIMITIVE TOKENS ==================== */
+/* Raw values named by what they ARE */
+
+:root {
+  /* Colors */
+  --color-blue-500: #2563eb;
+  --color-purple-500: #7c3aed;
+  --color-white: #ffffff;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-500: #6b7280;
+  --color-gray-900: #111827;
+  --color-gray-950: #030712;
+  --color-red-500: #ef4444;
+
+  /* Font sizes */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.25rem;    /* 20px */
+  --font-size-xl: 1.5rem;     /* 24px */
+  --font-size-2xl: 2rem;      /* 32px */
+
+  /* Spacing scale */
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;       /* 4px */
+  --spacing-2: 0.5rem;        /* 8px */
+  --spacing-3: 0.75rem;       /* 12px */
+  --spacing-4: 1rem;          /* 16px */
+  --spacing-6: 1.5rem;        /* 24px */
+  --spacing-8: 2rem;          /* 32px */
+  --spacing-12: 3rem;         /* 48px */
+  --spacing-16: 4rem;         /* 64px */
+
+  /* Border radius */
+  --radius-sm: 0.25rem;       /* 4px */
+  --radius-md: 0.5rem;        /* 8px */
+  --radius-lg: 0.75rem;       /* 12px */
+}
+
+/* ==================== SEMANTIC TOKENS ==================== */
+/* Intent-based tokens that components consume */
+
+:root {
+  /* Primary colors */
+  --color-primary: var(--color-blue-500);
+  --color-primary-foreground: var(--color-white);
+
+  /* Secondary colors */
+  --color-secondary: var(--color-purple-500);
+  --color-secondary-foreground: var(--color-white);
+
+  /* Background and text */
+  --color-background: var(--color-white);
+  --color-foreground: var(--color-gray-900);
+
+  /* Neutral states */
+  --color-muted: var(--color-gray-100);
+  --color-muted-foreground: var(--color-gray-500);
+
+  /* Destructive state */
+  --color-destructive: var(--color-red-500);
+  --color-destructive-foreground: var(--color-white);
+
+  /* Borders */
+  --color-border: var(--color-gray-200);
+
+  /* Default radius */
+  --radius-default: var(--radius-md);
+}
+
+/* Dark mode token overrides */
+.dark {
+  --color-background: var(--color-gray-950);
+  --color-foreground: var(--color-gray-50);
+  --color-muted: var(--color-gray-800);
+  --color-muted-foreground: var(--color-gray-500);
+  --color-border: var(--color-gray-700);
+}
+
+/* ==================== COMPONENT TOKENS ==================== */
+/* Scoped tokens for specific UI patterns */
+
+:root {
+  --input-height: var(--spacing-4);
+  --button-padding-x: var(--spacing-4);
+  --button-padding-y: var(--spacing-2);
+}
+
+/* ==================== TAILWIND INTEGRATION ==================== */
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-destructive: var(--color-destructive);
+  --color-destructive-foreground: var(--color-destructive-foreground);
+  --color-border: var(--color-border);
+  --radius-default: var(--radius-default);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+}
