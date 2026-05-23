@@ -26,7 +26,11 @@ type SegmentDetail = {
   length_m: number;
 };
 
-async function buildUserMessage(route: Route, time: number): Promise<string> {
+async function buildUserMessage(
+  route: Route,
+  time: number,
+  destinationLabel?: string,
+): Promise<string> {
   const hour = Math.max(0, Math.min(167, Math.floor(time)));
 
   const segmentDetails: SegmentDetail[] = [];
@@ -60,30 +64,39 @@ async function buildUserMessage(route: Route, time: number): Promise<string> {
       (s, i) =>
         `  Segment ${i + 1}: ${s.street_name} — ${s.length_m}m, score ${(s.composite_score * 100).toFixed(0)}/100, ` +
         `lux ${(s.lux * 100).toFixed(0)}, pedestrians ${(s.ped_count * 100).toFixed(0)}/hr, ` +
-        `canopy ${(s.canopy * 100).toFixed(0)}%, steepness ${(s.steepness * 100).toFixed(0)}%`
+        `canopy ${(s.canopy * 100).toFixed(0)}%, steepness ${(s.steepness * 100).toFixed(0)}%`,
     )
     .join("\n");
 
   const timeLabel = `${String(Math.floor(time / 7)).padStart(2, "0")}:${String((time % 7) * 10).padStart(2, "0")}`;
 
+  const destinationLine = destinationLabel
+    ? `\n- Destination: ${destinationLabel} — briefly name it in your explanation.`
+    : "";
+
   return `Route overview:
 - Total length: ${(route.total_length_m / 1000).toFixed(2)} km
 - Average score: ${(route.avg_score * 100).toFixed(0)}/100
-- Time of day: ${timeLabel} (hour-slot ${time}/167)
+- Time of day: ${timeLabel} (hour-slot ${time}/167)${destinationLine}
 - Segments (top ${segmentDetails.length}):
 ${segsText}
 
 Write the 4-paragraph explanation now.`;
 }
 
-export async function streamExplanation(route: Route, time: number, res: Response): Promise<void> {
+export async function streamExplanation(
+  route: Route,
+  time: number,
+  res: Response,
+  destinationLabel?: string,
+): Promise<void> {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
   res.flushHeaders();
 
   try {
-    const userMessage = await buildUserMessage(route, time);
+    const userMessage = await buildUserMessage(route, time, destinationLabel);
 
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-6",

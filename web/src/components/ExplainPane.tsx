@@ -14,6 +14,8 @@ export function ExplainPane() {
   const routes = useStore((s) => s.routes);
   const time = useStore((s) => s.time);
   const setOpenExplanation = useStore((s) => s.setOpenExplanation);
+  const selectedEventId = useStore((s) => s.selectedEventId);
+  const graph = useStore((s) => s.graph);
 
   const [text, setText] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -39,10 +41,18 @@ export function ExplainPane() {
     setElapsed(0);
 
     try {
+      const selectedEvent =
+        selectedEventId && graph?.events
+          ? graph.events.find((e) => e.id === selectedEventId)
+          : undefined;
+      const destinationLabel = selectedEvent
+        ? `the event "${selectedEvent.name}" at ${selectedEvent.venue_name}`
+        : undefined;
+
       const res = await fetch("/api/explain-route", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ route, time }),
+        body: JSON.stringify({ route, time, destinationLabel }),
         signal: ctrl.signal,
       });
 

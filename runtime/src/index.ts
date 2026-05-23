@@ -80,12 +80,12 @@ app.get("/api/describe-segment/:id", async (req, res) => {
 });
 
 app.post("/api/explain-route", async (req, res) => {
-  const { route, time } = req.body ?? {};
+  const { route, time, destinationLabel } = req.body ?? {};
   if (!route || typeof time !== "number") {
     res.status(400).json({ error: "missing route or time" });
     return;
   }
-  await streamExplanation(route, time, res);
+  await streamExplanation(route, time, res, destinationLabel);
 });
 
 app.listen(PORT, () => {
