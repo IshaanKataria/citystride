@@ -595,3 +595,75 @@ html, body, #root {
 }
 
 .explain-link:hover { opacity: 1; }
+
+.mode-inactive {
+  opacity: 0.7;
+  cursor: pointer;
+}
+.mode-inactive:hover {
+  opacity: 0.95;
+}
+
+.addr-locked {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.addr-clear {
+  background: none;
+  border: none;
+  color: #fbbf24;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 4px;
+}
+.addr-clear:hover {
+  color: #fff;
+}
+
+.event-hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+  padding: 6px 0;
+}
+
+.time-filter-pill {
+  font-size: 12px;
+  color: rgba(251, 191, 36, 0.9);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 4px 10px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.inspector-date {
+  font-size: 12px;
+  color: rgba(251, 191, 36, 0.85);
+  margin-top: 4px;
+}
+.inspector-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 8px;
+}
+.inspector-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #fbbf24;
+  text-decoration: none;
+}
+.inspector-link:hover {
+  text-decoration: underline;
+}
