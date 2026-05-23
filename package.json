@@ -1,0 +1,12 @@
+{
+  "name": "city-stride",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "bake": "node bake/bake.js",
+    "fetch": "node bake/fetch.js"
+  },
+  "dependencies": {
+    "@turf/turf": "^7.2.0"
+  }
+}
