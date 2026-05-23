@@ -12,6 +12,7 @@ import type { GraphArtifact, GraphEdge, Route, Event } from "~/lib/types";
 import { useAppState } from "~/hooks/use-app-state";
 import { findNearestNode } from "~/lib/graph";
 import { activeEventsAt } from "~/lib/events";
+import { EventListPanel } from "~/components/events/event-list-panel";
 
 // ─── MapTooltip ─────────────────────────────────────────────────
 const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: number; time: number }) => {
@@ -687,14 +688,23 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
       <GhostTabs mode={mode} onModeChange={setMode} />
       <ScoreLegend />
 
-      <PlanWalkPanel
-        graph={graph}
-        routes={routes}
-        isComputing={isComputing}
-        onFindRoute={handleFindRoute}
-        onClear={handleClear}
-        onExplain={(id) => { const r = routes?.find((rt) => rt.id === id); if (r) { setExplainRoute(r); } }}
-      />
+      {mode === "walk" ? (
+        <PlanWalkPanel
+          graph={graph}
+          routes={routes}
+          isComputing={isComputing}
+          onFindRoute={handleFindRoute}
+          onClear={handleClear}
+          onExplain={(id) => { const r = routes?.find((rt) => rt.id === id); if (r) { setExplainRoute(r); } }}
+        />
+      ) : (
+        <EventListPanel
+          events={graph.events ?? []}
+          time={time}
+          selectedEventId={selectedEventId}
+          onEventSelect={handleEventClick}
+        />
+      )}
 
       <TimeSlider
         time={time}
