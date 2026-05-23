@@ -5,6 +5,7 @@ import { PathLayer, TextLayer } from "@deck.gl/layers";
 import { useStore } from "../state/store";
 import { composite, scoreToRgba } from "../lib/scoring";
 import type { Edge } from "../../../shared/types";
+import { EventMarkers } from "./EventMarkers";
 
 const ROUTE_PALETTE: Array<[number, number, number]> = [
   [251, 146, 60],
@@ -119,5 +120,11 @@ export function MapLayers() {
     }
   }, [overlay, layers]);
 
-  return null;
+  return <EventModeLayers />;
+}
+
+function EventModeLayers() {
+  const mode = useStore((s) => s.mode);
+  if (mode !== "event") return null;
+  return <EventMarkers />;
 }
