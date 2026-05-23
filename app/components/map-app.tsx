@@ -10,7 +10,7 @@ import { computeRoutes } from "~/lib/routing";
 import { formatHourOfWeek, INITIAL_HOUR_OF_WEEK } from "~/lib/time";
 import type { GraphArtifact, GraphEdge, Route, Event } from "~/lib/types";
 import { useAppState } from "~/hooks/use-app-state";
-import { findNearestNode } from "~/lib/graph";
+import { findNearestNode } from "~/lib/graph-search";
 import { activeEventsAt } from "~/lib/events";
 import { EventListPanel } from "~/components/events/event-list-panel";
 
