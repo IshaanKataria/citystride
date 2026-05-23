@@ -9,6 +9,7 @@ import { scoreToColor, ROUTE_COLORS } from "~/lib/colors";
 import { computeRoutes } from "~/lib/routing";
 import { formatHourOfWeek, INITIAL_HOUR_OF_WEEK } from "~/lib/time";
 import type { GraphArtifact, GraphEdge, Route } from "~/lib/types";
+import { useAppState } from "~/hooks/use-app-state";
 
 // ─── MapTooltip ─────────────────────────────────────────────────
 const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: number; time: number }) => {
@@ -447,15 +448,22 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   const mapRef = useRef<maplibregl.Map | null>(null);
   const overlayRef = useRef<MapboxOverlay | null>(null);
 
-  const [time, setTime] = useState(INITIAL_HOUR_OF_WEEK);
+  const {
+    state,
+    setTime,
+    setRoutes: setRoutesInState,
+    clearRoutes: clearRoutesInState,
+    isStale,
+  } = useAppState();
+
+  // time/routes/etc. live in state; keep transient UI state local.
+  const time = state.time;
+  const routes = (state.routes as Route[] | null);
+  const routeComputedAt = state.routeComputedAt;
   const [pinnedEdge, setPinnedEdge] = useState<GraphEdge | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<{ edge: GraphEdge; x: number; y: number } | null>(null);
-  const [routes, setRoutes] = useState<Route[] | null>(null);
-  const [routeComputedAt, setRouteComputedAt] = useState<number | null>(null);
   const [isComputing, setIsComputing] = useState(false);
   const [explainRoute, setExplainRoute] = useState<Route | null>(null);
-
-  const isStale = routes !== null && routeComputedAt !== null && routeComputedAt !== time;
 
   // ── Build Deck.gl layers ──
   const getLayers = useCallback(() => {
@@ -557,11 +565,10 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
     setIsComputing(true);
     requestAnimationFrame(() => {
       const result = computeRoutes(graph.nodes, graph.edges, fromNode, toNode, time);
-      setRoutes(result);
-      setRouteComputedAt(time);
+      setRoutesInState(result, time);
       setIsComputing(false);
     });
-  }, [graph, time]);
+  }, [graph, time, setRoutesInState]);
 
   const handleRecompute = useCallback(() => {
     if (routes && routes.length > 0) {
@@ -571,9 +578,8 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   }, [routes]);
 
   const handleClear = useCallback(() => {
-    setRoutes(null);
-    setRouteComputedAt(null);
-  }, []);
+    clearRoutesInState();
+  }, [clearRoutesInState]);
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
