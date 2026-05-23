@@ -122,6 +122,35 @@ const TimeSlider = ({ time, onTimeChange, isStale, routeComputedAt, onRecompute 
 );
 
 // ─── PlanWalkPanel ──────────────────────────────────────────────
+function formatLength(m: number): string {
+  if (!Number.isFinite(m)) return "—";
+  if (m < 1000) return `${Math.round(m)} m`;
+  return `${(m / 1000).toFixed(2)} km`;
+}
+
+function googleMapsUrl(route: Route): string {
+  const pts = route.geometry;
+  if (!pts || pts.length < 2) return "";
+  const origin = pts[0];
+  const dest = pts[pts.length - 1];
+  const interior = pts.slice(1, -1);
+  const wpCount = Math.min(8, interior.length);
+  const sampled: [number, number][] = [];
+  if (wpCount > 0 && interior.length > 0) {
+    const step = interior.length / wpCount;
+    for (let i = 0; i < wpCount; i++) sampled.push(interior[Math.floor(i * step)]);
+  }
+  const fmt = (p: [number, number]) => `${p[1]},${p[0]}`;
+  const params = new URLSearchParams({
+    api: "1",
+    origin: fmt(origin),
+    destination: fmt(dest),
+    travelmode: "walking",
+  });
+  if (sampled.length > 0) params.set("waypoints", sampled.map(fmt).join("|"));
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+
 const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExplain }: {
   graph: GraphArtifact; routes: readonly Route[] | null; isComputing: boolean;
   onFindRoute: (from: number, to: number) => void; onClear: () => void; onExplain: (id: number) => void;
@@ -185,14 +214,29 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
           {routes.map((route, i) => {
             const c = ROUTE_COLORS[i % ROUTE_COLORS.length];
             return (
-              <div key={route.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: `rgb(${c[0]},${c[1]},${c[2]})` }}>{route.id}</span>
-                  <span className="text-xs text-white font-medium">{(route.score * 100).toFixed(0)}</span>
-                  <span className="text-xs text-gray-400">{route.length_m}m</span>
+              <div key={route.id} className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: `rgb(${c[0]},${c[1]},${c[2]})` }}>{route.id}</span>
+                  <span className="text-xs text-white font-medium tabular-nums">{(route.score * 100).toFixed(0)}</span>
+                  <span className="text-xs text-gray-400 tabular-nums">{formatLength(route.length_m)}</span>
                   {route.id === 1 && <span className="text-xs text-blue-400">Recommended</span>}
                 </div>
-                <button onClick={() => onExplain(route.id)} className="text-xs text-gray-400 underline hover:text-white">Explain</button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button onClick={() => onExplain(route.id)} className="text-xs text-gray-400 underline hover:text-white">Explain</button>
+                  <a
+                    href={googleMapsUrl(route)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Open in Google Maps (walking directions)"
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-md text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                    aria-label="Open route in Google Maps"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </a>
+                </div>
               </div>
             );
           })}
