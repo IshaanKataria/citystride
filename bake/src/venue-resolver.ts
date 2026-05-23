@@ -2,7 +2,8 @@ import { readFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { VENUE_ALIASES } from "./event-venue-aliases.ts";
-import type { LngLat } from "../../shared/types.ts";
+
+type LngLat = readonly [number, number];
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const VENUES_PATH = join(__dirname, "..", "..", "data", "raw", "venues.json");

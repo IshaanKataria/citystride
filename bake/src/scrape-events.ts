@@ -2,7 +2,21 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveVenue } from "./venue-resolver.ts";
-import type { Event } from "../../shared/types.ts";
+
+type LngLat = readonly [number, number];
+
+type Event = {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  start_date: string;
+  end_date: string;
+  venue_name: string;
+  address: string | null;
+  position: LngLat;
+  resolved_via: "venues_json" | "alias_then_venues_json";
+};
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = join(__dirname, "..", "..", "data");
