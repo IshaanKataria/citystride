@@ -3,9 +3,10 @@ import { existsSync, openSync, readSync, closeSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import createGraph, { type Graph } from "ngraph.graph";
-import type { GraphArtifact, Edge, Node, LngLat } from "../../shared/types.ts";
+import type { GraphArtifact, Edge, Node, LngLat, Event } from "../../shared/types.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const EVENTS_FILE = join(__dirname, "..", "..", "data", "events.json");
 
 // Try teammate's real data first, then fall back to my mock
 const CANDIDATE_PATHS = [
@@ -122,6 +123,16 @@ export async function loadGraph() {
   const raw = JSON.parse(await readFile(chosenPath, "utf-8"));
   const artifact = adaptIfTeammateFormat(raw);
   validate(artifact, chosenPath);
+
+  if (existsSync(EVENTS_FILE)) {
+    try {
+      const eventsRaw = JSON.parse(await readFile(EVENTS_FILE, "utf-8")) as Event[];
+      artifact.events = eventsRaw;
+      console.log(`Loaded ${eventsRaw.length} events from ${EVENTS_FILE}`);
+    } catch (err) {
+      console.warn(`events load failed (${EVENTS_FILE}): ${String(err)}`);
+    }
+  }
 
   const graph = createGraph<Node, Edge>();
   for (const node of artifact.nodes) graph.addNode(node.id, node);
