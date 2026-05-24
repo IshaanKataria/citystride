@@ -14,10 +14,19 @@ coverage/
 .idea/
 .vercel
 
-# Bake / data
-bake/output/
-bake/data/
+# Pipeline data (local only)
 /data/
 graph.json
 *.graph.json
 *.graph.bin
+
+# Old bake output dirs
+bake/output/
+bake/data/
+
+# Web app (old Vite SPA, removed)
+/web/
+
+# Runtime/shared (dead packages, removed)
+/runtime/
+/shared/
