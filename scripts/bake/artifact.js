@@ -1,21 +1,9 @@
 /**
- * Serializes the graph to data/graph.json.
+ * Serializes the graph to public/graph.json (compacted, app-ready).
  *
- * Format the runtime (Node.js API) loads once at startup:
- * {
- *   nodes: Array<{ id, lng, lat }>,
- *   edges: Array<{ id, fromNodeId, toNodeId, geometry, length_m, name, metrics }>,
- *   meta: { baked_at, edge_count, node_count }
- * }
- *
- * Metrics on each edge (all fields present, all normalized 0-1 unless *_raw):
- *   lux, lux_raw
- *   ped_vector (168), ped_vector_raw (168), ped_confidence
- *   steepness, grade_pct_raw
- *   surface, surface_raw
- *   transit, transit_raw
- *   venues_vector (168), venues_vector_raw (168), venues_count
- *   canopy, canopy_raw
+ * Metrics on each edge (normalized 0-1):
+ *   lux, steepness, surface, transit, canopy, ped_confidence
+ *   ped_vector (3 time buckets), venues_vector (3 time buckets)
  */
 
 import fs from 'fs';
@@ -23,9 +11,30 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUT_PATH = path.join(__dirname, '..', '..', 'data', 'bake-raw.json');
+const OUT_PATH = path.join(__dirname, '..', '..', 'public', 'graph.json');
 
-const ZERO_VEC_168 = new Array(168).fill(0);
+const TIME_BUCKETS = ['morning', 'afternoon', 'evening'];
+const ZERO_VEC_3 = [0, 0, 0];
+
+function bucketForHour(hour) {
+  if (hour >= 5 && hour < 12) return 0;
+  if (hour >= 12 && hour < 17) return 1;
+  return 2;
+}
+
+function compactVector(values) {
+  if (!values || values.length === 0) return ZERO_VEC_3;
+  if (values.length <= 3) return values;
+
+  const sums = [0, 0, 0];
+  const counts = [0, 0, 0];
+  for (let i = 0; i < values.length; i++) {
+    const b = bucketForHour(i % 24);
+    sums[b] += values[i] ?? 0;
+    counts[b] += 1;
+  }
+  return sums.map((s, i) => Number((s / Math.max(1, counts[i])).toFixed(4)));
+}
 
 function serializeEdge(e) {
   const m = e.metrics;
@@ -44,15 +53,8 @@ function serializeEdge(e) {
       surface: m.surface ?? 0.7,
       transit: m.transit ?? 0,
       canopy: m.canopy ?? 0,
-      ped_vector: m.ped_vector ?? ZERO_VEC_168,
-      venues_vector: m.venues_vector ?? ZERO_VEC_168,
-      lux_raw: m.lux_raw ?? 0,
-      grade_pct_raw: m.grade_pct_raw ?? 0,
-      surface_raw: m.surface_raw ?? { material: 'unknown', condition: 3, score: 0.7 },
-      transit_raw: m.transit_raw ?? { nearest_stop_m: 9999, stops_within_200m: 0 },
-      canopy_raw: m.canopy_raw ?? 0,
-      ped_vector_raw: m.ped_vector_raw ?? ZERO_VEC_168,
-      venues_count: m.venues_count ?? 0,
+      ped_vector: compactVector(m.ped_vector),
+      venues_vector: compactVector(m.venues_vector),
       ped_confidence: m.ped_confidence ?? { nearest_sensor_m: null, sensor_count: 0, is_interpolated: false },
     },
   });
@@ -70,6 +72,7 @@ export function writeArtifact(nodes, edges) {
     baked_at: new Date().toISOString(),
     edge_count: edges.length,
     node_count: nodes.size,
+    time_buckets: TIME_BUCKETS,
   });
 
   write(`{"meta":${meta},"nodes":[`);

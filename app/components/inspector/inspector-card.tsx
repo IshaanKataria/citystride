@@ -1,4 +1,4 @@
-import { computeScore } from "~/lib/scoring";
+import { computeScore, metricForTime } from "~/lib/scoring";
 import type { GraphEdge } from "~/lib/types";
 
 interface InspectorCardProps {
@@ -46,8 +46,8 @@ export const InspectorCard = ({ edge, time, onClose }: InspectorCardProps) => {
         <MetricBar label="Lighting" value={m.lux} rawLabel={`${(m.lux * 100).toFixed(0)}%`} />
         <MetricBar
           label="Foot traffic"
-          value={m.ped_vector[time]}
-          rawLabel={`${(m.ped_vector[time] * 100).toFixed(0)}%`}
+          value={metricForTime(m.ped_vector, time)}
+          rawLabel={`${(metricForTime(m.ped_vector, time) * 100).toFixed(0)}%`}
         />
         <MetricBar label="Steepness" value={m.steepness} rawLabel={`${(m.steepness * 100).toFixed(0)}%`} />
         <MetricBar label="Surface" value={m.surface} rawLabel={`${(m.surface * 100).toFixed(0)}%`} />
@@ -55,8 +55,8 @@ export const InspectorCard = ({ edge, time, onClose }: InspectorCardProps) => {
         <MetricBar label="Transit" value={m.transit} rawLabel={`${(m.transit * 100).toFixed(0)}%`} />
         <MetricBar
           label="Venues"
-          value={m.venues_vector[time]}
-          rawLabel={`${(m.venues_vector[time] * 100).toFixed(0)}%`}
+          value={metricForTime(m.venues_vector, time)}
+          rawLabel={`${(metricForTime(m.venues_vector, time) * 100).toFixed(0)}%`}
         />
       </div>
 

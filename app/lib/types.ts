@@ -35,6 +35,7 @@ export interface GraphMeta {
   readonly baked_at: string;
   readonly edge_count: number;
   readonly node_count: number;
+  readonly time_buckets?: readonly string[];
 }
 
 export interface GraphArtifact {

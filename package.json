@@ -8,9 +8,7 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "bake": "node scripts/bake/bake.js",
-    "adapt": "tsx scripts/adapt-bake.ts",
-    "compact:graph": "node --max-old-space-size=8192 --import=tsx/esm scripts/compact-graph.ts",
-    "bake:full": "npm run bake && npm run adapt && npm run compact:graph"
+    "bake:full": "npm run bake"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

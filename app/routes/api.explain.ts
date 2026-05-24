@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 
+import { metricForTime } from "~/lib/scoring";
 import type { Route } from "~/lib/types";
 
 const EXPLANATION_TOOL = {
@@ -70,7 +71,7 @@ function summarizeRoute(route: Route, time: number, isRecommended: boolean) {
     street: e.name,
     length_m: Math.round(e.length_m),
     lux_pct: Math.round(e.metrics.lux * 100),
-    ped_pct: Math.round(e.metrics.ped_vector[time] * 100),
+    ped_pct: Math.round(metricForTime(e.metrics.ped_vector, time) * 100),
     canopy_pct: Math.round(e.metrics.canopy * 100),
     surface_pct: Math.round(e.metrics.surface * 100),
     transit_pct: Math.round(e.metrics.transit * 100),

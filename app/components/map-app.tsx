@@ -4,7 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { PathLayer } from "@deck.gl/layers";
 
-import { computeScore } from "~/lib/scoring";
+import { computeScore, metricForTime } from "~/lib/scoring";
 import { scoreToColor, ROUTE_COLORS } from "~/lib/colors";
 import { computeRoutes } from "~/lib/routing";
 import { formatHourOfWeek, INITIAL_HOUR_OF_WEEK } from "~/lib/time";
@@ -49,12 +49,12 @@ const InspectorCard = ({ edge, time, onClose }: { edge: GraphEdge; time: number;
       </div>
       <div className="mt-3 space-y-2">
         <MetricBar label="Lighting" value={m.lux} rawLabel={`${(m.lux * 100).toFixed(0)}%`} />
-        <MetricBar label="Foot traffic" value={m.ped_vector[time]} rawLabel={`${(m.ped_vector[time] * 100).toFixed(0)}%`} />
+        <MetricBar label="Foot traffic" value={metricForTime(m.ped_vector, time)} rawLabel={`${(metricForTime(m.ped_vector, time) * 100).toFixed(0)}%`} />
         <MetricBar label="Steepness" value={m.steepness} rawLabel={`${(m.steepness * 100).toFixed(0)}%`} />
         <MetricBar label="Surface" value={m.surface} rawLabel={`${(m.surface * 100).toFixed(0)}%`} />
         <MetricBar label="Canopy" value={m.canopy} rawLabel={`${(m.canopy * 100).toFixed(0)}%`} />
         <MetricBar label="Transit" value={m.transit} rawLabel={`${(m.transit * 100).toFixed(0)}%`} />
-        <MetricBar label="Venues" value={m.venues_vector[time]} rawLabel={`${(m.venues_vector[time] * 100).toFixed(0)}%`} />
+        <MetricBar label="Venues" value={metricForTime(m.venues_vector, time)} rawLabel={`${(metricForTime(m.venues_vector, time) * 100).toFixed(0)}%`} />
       </div>
       {m.ped_confidence.nearest_sensor_m !== null && m.ped_confidence.nearest_sensor_m > 150 && (
         <p className="mt-2 text-xs text-muted-foreground/60">
