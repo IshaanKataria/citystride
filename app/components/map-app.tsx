@@ -10,6 +10,12 @@ import { formatHourOfWeek, INITIAL_HOUR_OF_WEEK } from "~/lib/time";
 import type { WorkerMessage, WorkerResponse } from "~/lib/routing.worker";
 import type { GraphArtifact, GraphEdge, Route } from "~/lib/types";
 
+const KIND_LABEL: Record<import("~/lib/types").RouteKind, string> = {
+  lively:     "Lively",
+  accessible: "Accessible",
+  shortest:   "Shortest",
+};
+
 // ─── MapTooltip ─────────────────────────────────────────────────
 const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: number; time: number }) => {
   const score = computeScore(edge.metrics, time);
@@ -227,9 +233,8 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
               <div key={route.id} className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: `rgb(${c[0]},${c[1]},${c[2]})` }}>{route.id}</span>
-                  <span className="text-xs text-card-foreground font-medium tabular-nums">{(route.score * 100).toFixed(0)}</span>
+                  <span className="text-xs text-card-foreground font-medium">{KIND_LABEL[route.kind]}</span>
                   <span className="text-xs text-muted-foreground tabular-nums">{formatLength(route.length_m)}</span>
-                  {route.id === 1 && <span className="text-xs text-primary">Recommended</span>}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button onClick={() => onExplain(route.id)} className="text-xs text-muted-foreground underline hover:text-foreground">Explain</button>
@@ -353,7 +358,9 @@ const ExplainSlideOut = ({
               >
                 {route.id}
               </span>
-              <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Why this route?</span>
+              <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                {KIND_LABEL[route.kind]} — Why this route?
+              </span>
             </div>
             <button
               onClick={onClose}
@@ -504,8 +511,8 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
           data: [route],
           getPath: (d) => d.geometry,
           getColor: [...c, 220] as [number, number, number, number],
-          getWidth: route.id === 1 ? 8 : 5,
-          widthMinPixels: route.id === 1 ? 5 : 3,
+          getWidth: route.kind === "lively" ? 8 : 5,
+          widthMinPixels: route.kind === "lively" ? 5 : 3,
           widthMaxPixels: 12,
           pickable: false,
         }));
