@@ -574,6 +574,19 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
           setRoutes(msg.routes);
           setRouteComputedAt(timeRef.current);
           setIsComputing(false);
+
+          if (msg.routes.length > 0 && mapRef.current) {
+            let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+            for (const route of msg.routes) {
+              for (const [lng, lat] of route.geometry) {
+                if (lng < minLng) minLng = lng;
+                if (lng > maxLng) maxLng = lng;
+                if (lat < minLat) minLat = lat;
+                if (lat > maxLat) maxLat = lat;
+              }
+            }
+            mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, duration: 800 });
+          }
         }
       }
     };
