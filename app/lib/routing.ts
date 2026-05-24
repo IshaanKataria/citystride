@@ -33,8 +33,22 @@ export const buildRoutingGraph = (
   return graph;
 };
 
+// Key: "fromNodeId-toNodeId" (both directions stored)
+type EdgeKey = `${number}-${number}`;
+const edgeKey = (a: number, b: number): EdgeKey => `${a}-${b}`;
+
+const buildEdgeMap = (edges: readonly GraphEdge[]): Map<EdgeKey, GraphEdge> => {
+  const map = new Map<EdgeKey, GraphEdge>();
+  for (const edge of edges) {
+    map.set(edgeKey(edge.fromNodeId, edge.toNodeId), edge);
+    map.set(edgeKey(edge.toNodeId, edge.fromNodeId), edge);
+  }
+  return map;
+};
+
 const findRoute = (
-  nodes: readonly GraphNode[],
+  nodeMap: Map<number, GraphNode>,
+  edgeMap: Map<EdgeKey, GraphEdge>,
   edges: readonly GraphEdge[],
   fromId: number,
   toId: number,
@@ -46,8 +60,8 @@ const findRoute = (
   const pathFinder = aStar(graph, {
     distance: (_from, _to, link) => link.data.cost,
     heuristic: (from, to) => {
-      const fromNode = nodes.find((n) => n.id === from.id);
-      const toNode = nodes.find((n) => n.id === to.id);
+      const fromNode = nodeMap.get(Number(from.id));
+      const toNode = nodeMap.get(Number(to.id));
       if (!fromNode || !toNode) { return 0; }
       const dLng = (toNode.lng - fromNode.lng) * 111320 * Math.cos((fromNode.lat * Math.PI) / 180);
       const dLat = (toNode.lat - fromNode.lat) * 110540;
@@ -65,11 +79,7 @@ const findRoute = (
   let totalScore = 0;
 
   for (let i = 0; i < pathNodeIds.length - 1; i++) {
-    const a = pathNodeIds[i];
-    const b = pathNodeIds[i + 1];
-    const edge = edges.find(
-      (e) => (e.fromNodeId === a && e.toNodeId === b) || (e.fromNodeId === b && e.toNodeId === a),
-    );
+    const edge = edgeMap.get(edgeKey(pathNodeIds[i], pathNodeIds[i + 1]));
     if (edge) {
       routeEdges.push(edge);
       totalLength += edge.length_m;
@@ -98,17 +108,20 @@ export const computeRoutes = (
   toId: number,
   hourOfWeek: number,
 ): Route[] => {
-  const route1 = findRoute(nodes, edges, fromId, toId, hourOfWeek);
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const edgeMap = buildEdgeMap(edges);
+
+  const route1 = findRoute(nodeMap, edgeMap, edges, fromId, toId, hourOfWeek);
   if (!route1) { return []; }
 
   const route1EdgeIds = new Set(route1.edges.map((e) => e.id));
-  const route2 = findRoute(nodes, edges, fromId, toId, hourOfWeek, route1EdgeIds);
+  const route2 = findRoute(nodeMap, edgeMap, edges, fromId, toId, hourOfWeek, route1EdgeIds);
 
   const route12EdgeIds = new Set([
     ...route1EdgeIds,
     ...(route2?.edges.map((e) => e.id) ?? []),
   ]);
-  const route3 = findRoute(nodes, edges, fromId, toId, hourOfWeek, route12EdgeIds);
+  const route3 = findRoute(nodeMap, edgeMap, edges, fromId, toId, hourOfWeek, route12EdgeIds);
 
   const routes = [route1, route2, route3]
     .filter((r): r is Route => r !== null)

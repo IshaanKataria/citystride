@@ -6,8 +6,8 @@ import { PathLayer } from "@deck.gl/layers";
 
 import { computeScore, metricForTime } from "~/lib/scoring";
 import { scoreToColor, ROUTE_COLORS } from "~/lib/colors";
-import { computeRoutes } from "~/lib/routing";
 import { formatHourOfWeek, INITIAL_HOUR_OF_WEEK } from "~/lib/time";
+import type { WorkerMessage, WorkerResponse } from "~/lib/routing.worker";
 import type { GraphArtifact, GraphEdge, Route } from "~/lib/types";
 
 // ─── MapTooltip ─────────────────────────────────────────────────
@@ -194,6 +194,7 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
         <div className="relative">
           <input type="text" placeholder="From street..." value={fromText}
             onChange={(e) => { setFromText(e.target.value); setFromNode(null); setError(null); setFromSugg(searchStreets(e.target.value)); }}
+            onBlur={() => setTimeout(() => setFromSugg([]), 150)}
             className="w-full rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
           {fromSugg.length > 0 && (
             <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-popover border border-border shadow-lg">
@@ -204,6 +205,7 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
         <div className="relative">
           <input type="text" placeholder="To street..." value={toText}
             onChange={(e) => { setToText(e.target.value); setToNode(null); setError(null); setToSugg(searchStreets(e.target.value)); }}
+            onBlur={() => setTimeout(() => setToSugg([]), 150)}
             className="w-full rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
           {toSugg.length > 0 && (
             <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-popover border border-border shadow-lg">
@@ -454,8 +456,12 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const overlayRef = useRef<MapboxOverlay | null>(null);
+  const workerRef = useRef<Worker | null>(null);
+  const workerReadyRef = useRef(false);
+  const requestIdRef = useRef(0);
 
   const [time, setTime] = useState(INITIAL_HOUR_OF_WEEK);
+  const timeRef = useRef(INITIAL_HOUR_OF_WEEK);
   const [pinnedEdge, setPinnedEdge] = useState<{ edge: GraphEdge; x: number; y: number } | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<{ edge: GraphEdge; x: number; y: number } | null>(null);
   const [routes, setRoutes] = useState<Route[] | null>(null);
@@ -553,6 +559,33 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
     return () => { overlay.finalize(); map.remove(); };
   }, []);
 
+  // ── Routing worker lifecycle ──
+  useEffect(() => {
+    const worker = new Worker(new URL("../lib/routing.worker.ts", import.meta.url), { type: "module" });
+    workerRef.current = worker;
+    workerReadyRef.current = false;
+
+    worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
+      const msg = e.data;
+      if (msg.type === "ready") {
+        workerReadyRef.current = true;
+      } else if (msg.type === "result") {
+        if (msg.requestId === requestIdRef.current) {
+          setRoutes(msg.routes);
+          setRouteComputedAt(timeRef.current);
+          setIsComputing(false);
+        }
+      }
+    };
+
+    worker.onerror = () => setIsComputing(false);
+
+    const initMsg: WorkerMessage = { type: "init", nodes: graph.nodes, edges: graph.edges };
+    worker.postMessage(initMsg);
+
+    return () => { worker.terminate(); };
+  }, [graph]);
+
   // ── Update layers when time/routes change ──
   useEffect(() => {
     if (overlayRef.current) {
@@ -562,14 +595,12 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
 
   // ── Route computation ──
   const handleFindRoute = useCallback((fromNode: number, toNode: number) => {
+    if (!workerRef.current || !workerReadyRef.current) return;
     setIsComputing(true);
-    requestAnimationFrame(() => {
-      const result = computeRoutes(graph.nodes, graph.edges, fromNode, toNode, time);
-      setRoutes(result);
-      setRouteComputedAt(time);
-      setIsComputing(false);
-    });
-  }, [graph, time]);
+    const requestId = ++requestIdRef.current;
+    const msg: WorkerMessage = { type: "compute", fromId: fromNode, toId: toNode, hourOfWeek: timeRef.current, requestId };
+    workerRef.current.postMessage(msg);
+  }, []);
 
   const handleRecompute = useCallback(() => {
     if (routes && routes.length > 0) {
@@ -606,7 +637,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
 
       <TimeSlider
         time={time}
-        onTimeChange={setTime}
+        onTimeChange={(t) => { setTime(t); timeRef.current = t; }}
         isStale={isStale}
         routeComputedAt={routeComputedAt}
         onRecompute={handleRecompute}
