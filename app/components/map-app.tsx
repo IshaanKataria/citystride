@@ -518,11 +518,21 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   useEffect(() => {
     if (!containerRef.current) { return; }
 
+    let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+    for (const node of graph.nodes) {
+      if (node.lng < minLng) minLng = node.lng;
+      if (node.lng > maxLng) maxLng = node.lng;
+      if (node.lat < minLat) minLat = node.lat;
+      if (node.lat > maxLat) maxLat = node.lat;
+    }
+    const maxBounds: [number, number, number, number] = [minLng, minLat, maxLng, maxLat];
+
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
       center: [144.965, -37.816],
       zoom: 15,
+      maxBounds,
     });
 
     map.on("error", (e) => {

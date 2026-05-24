@@ -96,12 +96,7 @@ const CityMap = ({
       if (node.lat < minLat) minLat = node.lat;
       if (node.lat > maxLat) maxLat = node.lat;
     }
-    const padLng = (maxLng - minLng) * 0.02;
-    const padLat = (maxLat - minLat) * 0.02;
-    const maxBounds: [number, number, number, number] = [
-      minLng - padLng, minLat - padLat,
-      maxLng + padLng, maxLat + padLat,
-    ];
+    const maxBounds: [number, number, number, number] = [minLng, minLat, maxLng, maxLat];
 
     const map = new maplibregl.Map({
       container: containerRef.current,
