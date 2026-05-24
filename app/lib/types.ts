@@ -49,8 +49,11 @@ export interface ScoredEdge {
   readonly score: number;
 }
 
+export type RouteKind = "lively" | "accessible" | "shortest";
+
 export interface Route {
   readonly id: number;
+  readonly kind: RouteKind;
   readonly edges: readonly GraphEdge[];
   readonly geometry: [number, number][];
   readonly score: number;
