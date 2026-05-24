@@ -35,11 +35,19 @@ const MetricBar = ({ label, value, rawLabel }: { label: string; value: number; r
   </div>
 );
 
-const InspectorCard = ({ edge, time, onClose }: { edge: GraphEdge; time: number; onClose: () => void }) => {
+const CARD_W = 288; // w-72
+const CARD_H = 260; // approximate height
+const OFFSET = 12;  // px gap from cursor
+
+const InspectorCard = ({ edge, x, y, time, onClose }: { edge: GraphEdge; x: number; y: number; time: number; onClose: () => void }) => {
   const score = computeScore(edge.metrics, time);
   const m = edge.metrics;
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 800;
+  const left = x + OFFSET + CARD_W > vw ? x - CARD_W - OFFSET : x + OFFSET;
+  const top = y + OFFSET + CARD_H > vh ? y - CARD_H - OFFSET : y + OFFSET;
   return (
-    <div className="absolute bottom-24 left-4 z-30 w-72 rounded-lg bg-card/95 p-4 shadow-lg backdrop-blur border border-border">
+    <div className="absolute z-30 w-72 rounded-lg bg-card/95 p-4 shadow-lg backdrop-blur border border-border" style={{ left, top }}>
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-medium text-card-foreground">{edge.name}</h3>
@@ -448,7 +456,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   const overlayRef = useRef<MapboxOverlay | null>(null);
 
   const [time, setTime] = useState(INITIAL_HOUR_OF_WEEK);
-  const [pinnedEdge, setPinnedEdge] = useState<GraphEdge | null>(null);
+  const [pinnedEdge, setPinnedEdge] = useState<{ edge: GraphEdge; x: number; y: number } | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<{ edge: GraphEdge; x: number; y: number } | null>(null);
   const [routes, setRoutes] = useState<Route[] | null>(null);
   const [routeComputedAt, setRouteComputedAt] = useState<number | null>(null);
@@ -527,7 +535,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
       },
       onClick: (info) => {
         if (info.object) {
-          setPinnedEdge(info.object as GraphEdge);
+          setPinnedEdge({ edge: info.object as GraphEdge, x: info.x, y: info.y });
         } else {
           setPinnedEdge(null);
         }
@@ -604,7 +612,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
         onRecompute={handleRecompute}
       />
 
-      {pinnedEdge && <InspectorCard edge={pinnedEdge} time={time} onClose={() => setPinnedEdge(null)} />}
+      {pinnedEdge && <InspectorCard edge={pinnedEdge.edge} x={pinnedEdge.x} y={pinnedEdge.y} time={time} onClose={() => setPinnedEdge(null)} />}
       {explainRoute && (
         <ExplainSlideOut
           route={explainRoute}
