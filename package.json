@@ -10,7 +10,8 @@
     "ingest": "tsx scripts/ingest/index.ts",
     "bake": "node scripts/bake/bake.js",
     "adapt": "tsx scripts/adapt-bake.ts",
-    "bake:full": "npm run bake && npm run adapt"
+    "compact:graph": "node --max-old-space-size=8192 --import=tsx/esm scripts/compact-graph.ts",
+    "bake:full": "npm run bake && npm run adapt && npm run compact:graph"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",
