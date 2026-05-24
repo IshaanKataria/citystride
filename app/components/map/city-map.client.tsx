@@ -89,11 +89,27 @@ const CityMap = ({
   useEffect(() => {
     if (!containerRef.current) { return; }
 
+    let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+    for (const node of graph.nodes) {
+      if (node.lng < minLng) minLng = node.lng;
+      if (node.lng > maxLng) maxLng = node.lng;
+      if (node.lat < minLat) minLat = node.lat;
+      if (node.lat > maxLat) maxLat = node.lat;
+    }
+    const padLng = (maxLng - minLng) * 0.02;
+    const padLat = (maxLat - minLat) * 0.02;
+    const maxBounds: [number, number, number, number] = [
+      minLng - padLng, minLat - padLat,
+      maxLng + padLng, maxLat + padLat,
+    ];
+
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
       center: [144.963, -37.814],
       zoom: 15,
+      minZoom: 13,
+      maxBounds,
       antialias: true,
     });
 
@@ -133,7 +149,7 @@ const CityMap = ({
       overlay.finalize();
       map.remove();
     };
-  }, []);
+  }, [graph.nodes]);
 
   useEffect(() => {
     if (overlayRef.current) {
