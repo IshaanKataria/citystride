@@ -8,7 +8,7 @@ import { computeScore, metricForTime } from "~/lib/scoring";
 import { scoreToColor, ROUTE_COLORS } from "~/lib/colors";
 import { formatHourOfWeek, INITIAL_HOUR_OF_WEEK } from "~/lib/time";
 import type { WorkerMessage, WorkerResponse } from "~/lib/routing.worker";
-import type { GraphArtifact, GraphEdge, Route } from "~/lib/types";
+import type { GraphArtifact, GraphEdge, Route, RouteKind } from "~/lib/types";
 
 const KIND_LABEL: Record<import("~/lib/types").RouteKind, string> = {
   lively:     "Lively",
@@ -165,9 +165,10 @@ function googleMapsUrl(route: Route): string {
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
-const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExplain }: {
+const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExplain, selectedKind, onSelectKind }: {
   graph: GraphArtifact; routes: readonly Route[] | null; isComputing: boolean;
   onFindRoute: (from: number, to: number) => void; onClear: () => void; onExplain: (id: number) => void;
+  selectedKind: RouteKind; onSelectKind: (kind: RouteKind) => void;
 }) => {
   const [fromText, setFromText] = useState("");
   const [toText, setToText] = useState("");
@@ -474,6 +475,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   const [routes, setRoutes] = useState<Route[] | null>(null);
   const [routeComputedAt, setRouteComputedAt] = useState<number | null>(null);
   const [isComputing, setIsComputing] = useState(false);
+  const [selectedKind, setSelectedKind] = useState<RouteKind>("lively");
   const [explainRoute, setExplainRoute] = useState<Route | null>(null);
 
   const isStale = routes !== null && routeComputedAt !== null && routeComputedAt !== time;
@@ -503,23 +505,23 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
     const layers: any[] = [streetscoreLayer];
 
     if (routes) {
-      for (let i = 0; i < routes.length; i++) {
-        const route = routes[i];
-        const c = ROUTE_COLORS[i % ROUTE_COLORS.length];
+      const selected = routes.find(r => r.kind === selectedKind);
+      if (selected) {
+        const c = ROUTE_COLORS[(selected.id - 1) % ROUTE_COLORS.length];
         layers.push(new PathLayer<Route>({
-          id: `route-${route.id}`,
-          data: [route],
+          id: `route-${selected.id}`,
+          data: [selected],
           getPath: (d) => d.geometry,
           getColor: [...c, 220] as [number, number, number, number],
-          getWidth: route.kind === "lively" ? 8 : 5,
-          widthMinPixels: route.kind === "lively" ? 5 : 3,
+          getWidth: 8,
+          widthMinPixels: 5,
           widthMaxPixels: 12,
           pickable: false,
         }));
       }
     }
     return layers;
-  }, [graph, time, routes]);
+  }, [graph, time, routes, selectedKind]);
 
   // ── Init MapLibre + Deck.gl overlay ──
   useEffect(() => {
@@ -642,6 +644,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   const handleClear = useCallback(() => {
     setRoutes(null);
     setRouteComputedAt(null);
+    setSelectedKind("lively");
   }, []);
 
   return (
@@ -663,6 +666,8 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
         onFindRoute={handleFindRoute}
         onClear={handleClear}
         onExplain={(id) => { const r = routes?.find((rt) => rt.id === id); if (r) { setExplainRoute(r); } }}
+        selectedKind={selectedKind}
+        onSelectKind={setSelectedKind}
       />
 
       <TimeSlider
