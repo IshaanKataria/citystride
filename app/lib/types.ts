@@ -49,7 +49,7 @@ export interface ScoredEdge {
   readonly score: number;
 }
 
-export type RouteKind = "lively" | "accessible" | "shortest";
+export type RouteKind = "lively" | "accessible" | "balanced" | "shortest";
 
 export interface Route {
   readonly id: number;

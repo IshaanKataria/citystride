@@ -58,14 +58,22 @@ export const metricForTime = (values: readonly number[] | undefined, hourOfWeek:
   return values[hourOfWeek] ?? values[((hourOfWeek % values.length) + values.length) % values.length] ?? 0;
 };
 
+export const pedConfidenceFactor = (conf: EdgeMetrics["ped_confidence"]): number => {
+  if (!conf.is_interpolated) return 1.0;
+  if (conf.nearest_sensor_m === null) return 0.3;
+  if (conf.nearest_sensor_m > 300) return 0.5;
+  return 0.8;
+};
+
 export const computeScore = (
   metrics: EdgeMetrics,
   hourOfWeek: number,
   weights: WeightProfile = WEIGHTS_DEFAULT,
 ): number => {
+  const pedFactor = pedConfidenceFactor(metrics.ped_confidence);
   return (
     weights.lux * metrics.lux +
-    weights.ped_vector * metricForTime(metrics.ped_vector, hourOfWeek) +
+    weights.ped_vector * metricForTime(metrics.ped_vector, hourOfWeek) * pedFactor +
     weights.steepness * metrics.steepness +
     weights.surface * metrics.surface +
     weights.canopy * metrics.canopy +

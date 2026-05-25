@@ -13,11 +13,12 @@ import type { GraphArtifact, GraphEdge, Route, RouteKind } from "~/lib/types";
 const KIND_LABEL: Record<RouteKind, string> = {
   lively:     "Lively",
   accessible: "Accessible",
+  balanced:   "Balanced",
   shortest:   "Shortest",
 };
 
-const KIND_TAB_ORDER: RouteKind[] = ["lively", "accessible", "shortest"];
-const KIND_INDEX: Record<RouteKind, number> = { lively: 0, accessible: 1, shortest: 2 };
+const KIND_TAB_ORDER: RouteKind[] = ["lively", "accessible", "balanced", "shortest"];
+const KIND_INDEX: Record<RouteKind, number> = { lively: 0, accessible: 1, balanced: 2, shortest: 3 };
 
 // ─── MapTooltip ─────────────────────────────────────────────────
 const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: number; time: number }) => {

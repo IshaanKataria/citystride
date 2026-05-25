@@ -17,17 +17,21 @@ interface EdgeData {
   readonly cost: number;
 }
 
+const DIVERSITY_PENALTY = 2.5;
+
 const buildRoutingGraph = (
   edges: readonly GraphEdge[],
   hourOfWeek: number,
   weights: WeightProfile,
   alpha: number,
+  usedEdgeIds: ReadonlySet<string> = new Set(),
 ) => {
   const graph = createGraph<unknown, EdgeData>();
 
   for (const edge of edges) {
     const score = computeScore(edge.metrics, hourOfWeek, weights);
-    const cost = edgeCost(edge.length_m, score, alpha);
+    const penaltyFactor = usedEdgeIds.has(edge.id) ? DIVERSITY_PENALTY : 1;
+    const cost = edge.length_m + penaltyFactor * alpha * edge.length_m * (1 - score);
     graph.addLink(edge.fromNodeId, edge.toNodeId, { edge, cost });
     graph.addLink(edge.toNodeId, edge.fromNodeId, { edge, cost });
   }
@@ -57,8 +61,9 @@ const findRoute = (
   hourOfWeek: number,
   weights: WeightProfile,
   alpha: number,
+  usedEdgeIds: ReadonlySet<string> = new Set(),
 ): Omit<Route, "id" | "kind"> | null => {
-  const graph = buildRoutingGraph(edges, hourOfWeek, weights, alpha);
+  const graph = buildRoutingGraph(edges, hourOfWeek, weights, alpha, usedEdgeIds);
 
   const pathFinder = aStar(graph, {
     distance: (_from, _to, link) => link.data.cost,
@@ -84,21 +89,22 @@ const findRoute = (
   const routeEdges: GraphEdge[] = [];
   const geometry: [number, number][] = [];
   let totalLength = 0;
-  let totalScore = 0;
+  let weightedScoreSum = 0;
 
   for (let i = 0; i < pathNodeIds.length - 1; i++) {
     const edge = edgeMap.get(edgeKey(pathNodeIds[i], pathNodeIds[i + 1]));
     if (edge) {
       routeEdges.push(edge);
+      const edgeScore = computeScore(edge.metrics, hourOfWeek, weights);
       totalLength += edge.length_m;
-      totalScore += computeScore(edge.metrics, hourOfWeek, weights);
+      weightedScoreSum += edgeScore * edge.length_m;
       for (const coord of edge.geometry) {
         geometry.push(coord as [number, number]);
       }
     }
   }
 
-  const avgScore = routeEdges.length > 0 ? totalScore / routeEdges.length : 0;
+  const avgScore = totalLength > 0 ? weightedScoreSum / totalLength : 0;
 
   return { edges: routeEdges, geometry, score: avgScore, length_m: totalLength };
 };
@@ -116,13 +122,19 @@ export const computeRoutes = (
   const strategies: Array<{ kind: RouteKind; id: number; weights: WeightProfile; alpha: number }> = [
     { kind: "lively",     id: 1, weights: WEIGHTS_LIVELY,     alpha: ALPHA },
     { kind: "accessible", id: 2, weights: WEIGHTS_ACCESSIBLE, alpha: ALPHA },
-    { kind: "shortest",   id: 3, weights: WEIGHTS_DEFAULT,    alpha: 0 },
+    { kind: "balanced",   id: 3, weights: WEIGHTS_DEFAULT,    alpha: ALPHA },
+    { kind: "shortest",   id: 4, weights: WEIGHTS_DEFAULT,    alpha: 0 },
   ];
 
   const routes: Route[] = [];
+  const usedEdgeIds = new Set<string>();
+
   for (const { kind, id, weights, alpha } of strategies) {
-    const result = findRoute(nodeMap, edgeMap, edges, fromId, toId, hourOfWeek, weights, alpha);
-    if (result) routes.push({ ...result, id, kind });
+    const result = findRoute(nodeMap, edgeMap, edges, fromId, toId, hourOfWeek, weights, alpha, usedEdgeIds);
+    if (result) {
+      routes.push({ ...result, id, kind });
+      for (const e of result.edges) usedEdgeIds.add(e.id);
+    }
   }
 
   return routes;
