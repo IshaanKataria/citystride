@@ -1,8 +1,10 @@
 # CityStride
 
+**Live:** [citystride.vercel.app](https://citystride.vercel.app)
+
 Interactive pedestrian streetscore map for Melbourne. Every street in the City of Melbourne LGA colored by a composite walkability score that changes with time of day.
 
-![CityStride map showing Melbourne streets colored by walkability score]
+<img src="public/sitepic.png" alt="CityStride map showing Melbourne streets colored by walkability score" width="700" />
 
 ## What it does
 
