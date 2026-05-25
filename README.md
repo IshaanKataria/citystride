@@ -8,9 +8,10 @@ Interactive pedestrian streetscore map for Melbourne. Every street in the City o
 
 - **Streetscore map** — every pedestrian edge colored by a composite score (lighting, foot traffic, gradient, surface quality, canopy, transit proximity)
 - **Time slider** — scrub through 168 hours of the week; map recolors live
-- **Route planner** — type two Melbourne addresses, get 3 scored walking routes (A\* with streetscore cost function)
+- **Route planner** — type two Melbourne streets, get 3 scored walking routes (Lively / Accessible / Shortest) shown as tabs
+- **Route rendering** — smoothed geometry (corner-cutting algorithm), MapLibre native line layers with GPU blur glow; streets dim to background when route is active
 - **Inspector** — hover or click any street segment for per-metric breakdown
-- **AI explanation** — streaming Claude-powered explanation for any route
+- **AI explanation** — Claude-powered slide-out explaining why a route was chosen, with metric highlights and street picks
 
 ## Stack
 
@@ -18,7 +19,8 @@ Interactive pedestrian streetscore map for Melbourne. Every street in the City o
 | --- | --- |
 | Framework | React Router v7 (SSR) |
 | Map | MapLibre GL JS v5 |
-| Overlays | Deck.gl PathLayer (WebGL) |
+| Street score overlay | Deck.gl PathLayer (WebGL) |
+| Route rendering | MapLibre native line layers (GPU blur glow) |
 | Routing | ngraph.path (A\* in Web Worker) |
 | AI | Anthropic SDK (streaming) |
 | Styling | Tailwind CSS v4 + shadcn/ui |
@@ -45,26 +47,39 @@ data/
 
 ## Getting started
 
-### 1. Bake the graph
+### 1. Install dependencies
 
-Run once to produce `data/graph.json`. Requires internet access to fetch CoM open datasets (~2 min).
+```sh
+npm install
+```
+
+### 2. Set env vars
+
+```sh
+cp .env.example .env        # or create .env manually
+# Add your Anthropic API key — required for route explanations
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+### 3. Bake the graph
+
+Run once to produce `data/graph.json`. Fetches City of Melbourne open datasets (~2 min, requires internet).
 
 ```sh
 npm run bake
 ```
 
-Cached raw data lands in `data/raw/`. Re-running skips fetches.
+Cached raw data lands in `data/raw/`. Re-running skips already-fetched files.
 
-### 2. Dev server
+### 4. Dev server
 
 ```sh
-npm install
 npm run dev
 ```
 
-App runs at `http://localhost:5173`. Requires `data/graph.json` to exist.
+App runs at `http://localhost:5173`.
 
-### 3. Type check
+### 5. Type check
 
 ```sh
 npm run typecheck
