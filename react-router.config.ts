@@ -1,7 +1,10 @@
 import type { Config } from "@react-router/dev/config";
-import { vercelPreset } from "@vercel/react-router/vite";
+
+const presets = process.env.VERCEL
+  ? [(await import("@vercel/react-router/vite")).vercelPreset()]
+  : [];
 
 export default {
   ssr: true,
-  presets: [vercelPreset()],
+  presets,
 } satisfies Config;
