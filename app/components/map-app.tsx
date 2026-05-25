@@ -10,11 +10,14 @@ import { formatHourOfWeek, INITIAL_HOUR_OF_WEEK } from "~/lib/time";
 import type { WorkerMessage, WorkerResponse } from "~/lib/routing.worker";
 import type { GraphArtifact, GraphEdge, Route, RouteKind } from "~/lib/types";
 
-const KIND_LABEL: Record<import("~/lib/types").RouteKind, string> = {
+const KIND_LABEL: Record<RouteKind, string> = {
   lively:     "Lively",
   accessible: "Accessible",
   shortest:   "Shortest",
 };
+
+const KIND_TAB_ORDER: RouteKind[] = ["lively", "accessible", "shortest"];
+const KIND_INDEX: Record<RouteKind, number> = { lively: 0, accessible: 1, shortest: 2 };
 
 // ─── MapTooltip ─────────────────────────────────────────────────
 const MapTooltip = ({ edge, x, y, time }: { edge: GraphEdge; x: number; y: number; time: number }) => {
@@ -227,20 +230,41 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
         {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
       {routes && routes.length > 0 && (
-        <div className="mt-3 border-t border-border pt-3 space-y-2">
-          {routes.map((route, i) => {
-            const c = ROUTE_COLORS[i % ROUTE_COLORS.length];
+        <div className="mt-3 border-t border-border pt-3">
+          {/* Tab strip */}
+          <div className="flex gap-1 mb-3">
+            {KIND_TAB_ORDER.map((kind) => {
+              const route = routes.find(r => r.kind === kind);
+              if (!route) return null;
+              const c = ROUTE_COLORS[KIND_INDEX[kind]];
+              const isActive = selectedKind === kind;
+              return (
+                <button
+                  key={kind}
+                  onClick={() => onSelectKind(kind)}
+                  className={`flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                    isActive ? "text-white" : "text-muted-foreground hover:text-foreground bg-muted"
+                  }`}
+                  style={isActive ? { backgroundColor: `rgb(${c[0]},${c[1]},${c[2]})` } : {}}
+                >
+                  {KIND_LABEL[kind]}
+                </button>
+              );
+            })}
+          </div>
+          {/* Detail row for active route */}
+          {(() => {
+            const active = routes.find(r => r.kind === selectedKind);
+            if (!active) return null;
             return (
-              <div key={route.id} className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: `rgb(${c[0]},${c[1]},${c[2]})` }}>{route.id}</span>
-                  <span className="text-xs text-card-foreground font-medium">{KIND_LABEL[route.kind]}</span>
-                  <span className="text-xs text-muted-foreground tabular-nums">{formatLength(route.length_m)}</span>
-                </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {formatLength(active.length_m)} · score {(active.score * 100).toFixed(0)}
+                </span>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={() => onExplain(route.id)} className="text-xs text-muted-foreground underline hover:text-foreground">Explain</button>
+                  <button onClick={() => onExplain(active.id)} className="text-xs text-muted-foreground underline hover:text-foreground">Explain</button>
                   <a
-                    href={googleMapsUrl(route)}
+                    href={googleMapsUrl(active)}
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Open in Google Maps (walking directions)"
@@ -255,8 +279,8 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
                 </div>
               </div>
             );
-          })}
-          <button onClick={onClear} className="text-xs text-muted-foreground underline hover:text-foreground">Clear routes</button>
+          })()}
+          <button onClick={onClear} className="mt-2 text-xs text-muted-foreground underline hover:text-foreground">Clear routes</button>
         </div>
       )}
     </div>
