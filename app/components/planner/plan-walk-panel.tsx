@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { useGraph } from "~/hooks/use-graph";
 import { ROUTE_COLORS } from "~/lib/colors";
 import type { GraphEdge, Route } from "~/lib/types";
+import { Button, buttonVariants } from "~/components/ui/button";
 
 function formatLength(m: number): string {
   if (!Number.isFinite(m)) return "—";
@@ -188,25 +189,30 @@ export const PlanWalkPanel = ({
                       <span className="text-xs text-primary">Recommended</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="xs"
                       onClick={() => onExplain(route.id)}
-                      className="text-xs text-muted-foreground underline hover:text-foreground"
                     >
-                      Explain
-                    </button>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 16v-4M12 8h.01" />
+                      </svg>
+                      AI Explain
+                    </Button>
                     <a
                       href={googleMapsUrl(route)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title="Open in Google Maps (walking directions)"
-                      className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                       aria-label="Open route in Google Maps"
+                      className={buttonVariants({ variant: "outline", size: "xs" })}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                         <circle cx="12" cy="10" r="3" />
                       </svg>
+                      Navigate
                     </a>
                   </div>
                 </div>

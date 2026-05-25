@@ -199,17 +199,17 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
   }, [graph.edges]);
 
   return (
-    <div className="absolute left-4 top-4 z-30 w-72 rounded-lg bg-card/95 p-4 shadow-lg backdrop-blur border border-border">
-      <h2 className="text-sm font-semibold text-card-foreground mb-3">Plan a Walk</h2>
-      <div className="space-y-2">
+    <div className="absolute left-4 top-4 z-30 w-96 rounded-lg bg-card/95 p-5 shadow-lg backdrop-blur border border-border">
+      <h2 className="text-sm font-semibold text-card-foreground mb-4">Plan a Walk</h2>
+      <div className="space-y-3">
         <div className="relative">
           <input type="text" placeholder="From street..." value={fromText}
             onChange={(e) => { setFromText(e.target.value); setFromNode(null); setError(null); setFromSugg(searchStreets(e.target.value)); }}
             onBlur={() => setTimeout(() => setFromSugg([]), 150)}
-            className="w-full rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
+            className="w-full rounded-md border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
           {fromSugg.length > 0 && (
             <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-popover border border-border shadow-lg">
-              {fromSugg.map((e) => <li key={e.id}><button onClick={() => { setFromText(e.name); setFromNode(e.fromNodeId); setFromSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-popover-foreground hover:bg-accent">{e.name}</button></li>)}
+              {fromSugg.map((e) => <li key={e.id}><button onClick={() => { setFromText(e.name); setFromNode(e.fromNodeId); setFromSugg([]); }} className="w-full px-3 py-2 text-left text-sm text-popover-foreground hover:bg-accent">{e.name}</button></li>)}
             </ul>
           )}
         </div>
@@ -217,23 +217,23 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
           <input type="text" placeholder="To street..." value={toText}
             onChange={(e) => { setToText(e.target.value); setToNode(null); setError(null); setToSugg(searchStreets(e.target.value)); }}
             onBlur={() => setTimeout(() => setToSugg([]), 150)}
-            className="w-full rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
+            className="w-full rounded-md border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
           {toSugg.length > 0 && (
             <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-40 overflow-y-auto rounded-md bg-popover border border-border shadow-lg">
-              {toSugg.map((e) => <li key={e.id}><button onClick={() => { setToText(e.name); setToNode(e.fromNodeId); setToSugg([]); }} className="w-full px-3 py-1.5 text-left text-xs text-popover-foreground hover:bg-accent">{e.name}</button></li>)}
+              {toSugg.map((e) => <li key={e.id}><button onClick={() => { setToText(e.name); setToNode(e.fromNodeId); setToSugg([]); }} className="w-full px-3 py-2 text-left text-sm text-popover-foreground hover:bg-accent">{e.name}</button></li>)}
             </ul>
           )}
         </div>
         <button onClick={() => { if (fromNode === null || toNode === null) { setError("Please select valid streets."); return; } onFindRoute(fromNode, toNode); }}
-          disabled={isComputing} className="w-full rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+          disabled={isComputing} className="w-full rounded-md bg-primary px-3 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
           {isComputing ? "Computing..." : "Find route"}
         </button>
-        {error && <p className="text-xs text-destructive">{error}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
       </div>
       {routes && routes.length > 0 && (
-        <div className="mt-3 border-t border-border pt-3">
+        <div className="mt-4 border-t border-border pt-4">
           {/* Tab strip */}
-          <div className="flex gap-1 mb-3">
+          <div className="flex gap-1.5 mb-4">
             {KIND_TAB_ORDER.map((kind) => {
               const route = routes.find(r => r.kind === kind);
               if (!route) return null;
@@ -243,7 +243,7 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
                 <button
                   key={kind}
                   onClick={() => onSelectKind(kind)}
-                  className={`flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                  className={`flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
                     isActive ? "text-white" : "text-muted-foreground hover:text-foreground bg-muted"
                   }`}
                   style={isActive ? { backgroundColor: `rgb(${c[0]},${c[1]},${c[2]})` } : {}}
@@ -253,13 +253,13 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
               );
             })}
           </div>
-          {/* Detail row for active route */}
+          {/* Detail + actions for active route */}
           {(() => {
             const active = routes.find(r => r.kind === selectedKind);
             if (!active) return null;
             return (
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground tabular-nums">
+              <div className="space-y-3">
+                <span className="text-sm text-muted-foreground tabular-nums">
                   {formatLength(active.length_m)}{(() => {
                     const counts: Record<string, number> = {};
                     for (const e of active.edges) if (e.name) counts[e.name] = (counts[e.name] ?? 0) + 1;
@@ -267,26 +267,33 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
                     return top ? ` · via ${top[0]}` : "";
                   })()}
                 </span>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={() => onExplain(active.id)} className="text-xs text-muted-foreground underline hover:text-foreground">Explain</button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onExplain(active.id)}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" />
+                    </svg>
+                    AI Explain
+                  </button>
                   <a
                     href={googleMapsUrl(active)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="Open in Google Maps (walking directions)"
-                    className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                     aria-label="Open route in Google Maps"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                      <circle cx="12" cy="10" r="3" />
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
                     </svg>
+                    Navigate
                   </a>
                 </div>
               </div>
             );
           })()}
-          <button onClick={onClear} className="mt-2 text-xs text-muted-foreground underline hover:text-foreground">Clear routes</button>
+          <button onClick={onClear} className="mt-3 text-xs text-muted-foreground underline hover:text-foreground">Clear routes</button>
         </div>
       )}
     </div>
