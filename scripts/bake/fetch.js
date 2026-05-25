@@ -68,10 +68,10 @@ out body;
 out skel qt;`;
 
   const OVERPASS_MIRRORS = [
+    'https://overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
     'https://overpass.openstreetmap.ru/api/interpreter',
     'https://overpass.nchc.org.tw/api/interpreter',
-    'https://overpass-api.de/api/interpreter',
   ];
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -87,7 +87,11 @@ out skel qt;`;
       console.log(`  osm: trying ${mirror} (attempt ${attempt + 1})...`);
       const res = await fetch(mirror, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'CityStride/1.0 (Claude Impact Lab Melbourne; civic data bake)',
+          'Accept': 'application/json',
+        },
         body: `data=${encodeURIComponent(query)}`,
       });
       if (res.status === 429 || res.status === 503 || res.status === 406 || res.status === 403) {

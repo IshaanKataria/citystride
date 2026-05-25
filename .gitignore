@@ -17,6 +17,7 @@ coverage/
 # Pipeline data (local only)
 /data/
 graph.json
+graph.json.gz
 *.graph.json
 *.graph.bin
 

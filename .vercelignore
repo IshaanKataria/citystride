@@ -1,0 +1,20 @@
+node_modules
+.react-router
+build
+.git
+*.log
+*.png
+
+# Raw bake cache (huge, not needed at runtime)
+data/raw
+data/*.csv
+data/*.geojson
+
+# Ship only the gzipped graph (13MB); the raw 139MB exceeds Vercel's 100MB limit
+public/graph.json
+
+# Dead packages from the old dual-implementation
+web
+runtime
+shared
+scripts/bake/node_modules

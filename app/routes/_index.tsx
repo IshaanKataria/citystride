@@ -17,19 +17,29 @@ const IndexRoute = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/graph.json")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
+    async function loadGraph() {
+      try {
+        // The full-city graph (~139MB) is pre-gzipped to ~13MB so it fits
+        // Vercel's 100MB static-file limit. Decompress in the browser.
+        const res = await fetch("/graph.json.gz");
+        if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+        const stream = res.body.pipeThrough(new DecompressionStream("gzip"));
+        const data = (await new Response(stream).json()) as GraphArtifact;
         setGraph(data);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Failed to load graph:", err);
+        // Fallback: try the uncompressed artifact if it happens to be present.
+        try {
+          const res = await fetch("/graph.json");
+          if (res.ok) setGraph((await res.json()) as GraphArtifact);
+        } catch (fallbackErr) {
+          console.error("Fallback graph load failed:", fallbackErr);
+        }
+      } finally {
         setLoading(false);
-      });
+      }
+    }
+    loadGraph();
   }, []);
 
   if (loading) {
