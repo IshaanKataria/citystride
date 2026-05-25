@@ -367,7 +367,7 @@ const ExplainSlideOut = ({
     return () => window.removeEventListener("keydown", h);
   }, [onClose]);
 
-  const c = ROUTE_COLORS[(route.id - 1) % ROUTE_COLORS.length];
+  const c = ROUTE_COLORS[KIND_INDEX[route.kind]];
   const accent = `rgb(${c[0]},${c[1]},${c[2]})`;
 
   return (
@@ -531,7 +531,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
     if (routes) {
       const selected = routes.find(r => r.kind === selectedKind);
       if (selected) {
-        const c = ROUTE_COLORS[(selected.id - 1) % ROUTE_COLORS.length];
+        const c = ROUTE_COLORS[KIND_INDEX[selected.kind]];
         layers.push(new PathLayer<Route>({
           id: `route-${selected.id}`,
           data: [selected],
