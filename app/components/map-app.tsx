@@ -259,7 +259,12 @@ const PlanWalkPanel = ({ graph, routes, isComputing, onFindRoute, onClear, onExp
             return (
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs text-muted-foreground tabular-nums">
-                  {formatLength(active.length_m)} · score {(active.score * 100).toFixed(0)}
+                  {formatLength(active.length_m)}{(() => {
+                    const counts: Record<string, number> = {};
+                    for (const e of active.edges) if (e.name) counts[e.name] = (counts[e.name] ?? 0) + 1;
+                    const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+                    return top ? ` · via ${top[0]}` : "";
+                  })()}
                 </span>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button onClick={() => onExplain(active.id)} className="text-xs text-muted-foreground underline hover:text-foreground">Explain</button>
