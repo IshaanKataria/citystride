@@ -488,6 +488,23 @@ const ExplainSlideOut = ({
   );
 };
 
+// ─── Geometry smoothing ─────────────────────────────────────────
+function smoothPath(pts: [number, number][], passes = 3): [number, number][] {
+  let out = pts;
+  for (let p = 0; p < passes; p++) {
+    const next: [number, number][] = [out[0]];
+    for (let i = 0; i < out.length - 1; i++) {
+      const [x0, y0] = out[i];
+      const [x1, y1] = out[i + 1];
+      next.push([0.75 * x0 + 0.25 * x1, 0.75 * y0 + 0.25 * y1]);
+      next.push([0.25 * x0 + 0.75 * x1, 0.25 * y0 + 0.75 * y1]);
+    }
+    next.push(out[out.length - 1]);
+    out = next;
+  }
+  return out;
+}
+
 // ─── MapApp (main orchestrator) ─────────────────────────────────
 export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -520,7 +537,7 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
       getColor: (d) => {
         const score = computeScore(d.metrics, time);
         const color = scoreToColor(score);
-        return hasRoutes ? [color[0], color[1], color[2], 100] as [number, number, number, number] : color;
+        return hasRoutes ? [color[0], color[1], color[2], 40] as [number, number, number, number] : color;
       },
       getWidth: 3,
       widthMinPixels: 2,
@@ -531,26 +548,8 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
       updateTriggers: { getColor: [time, hasRoutes] },
     });
 
-    const layers: any[] = [streetscoreLayer];
-
-    if (routes) {
-      const selected = routes.find(r => r.kind === selectedKind);
-      if (selected) {
-        const c = ROUTE_COLORS[KIND_INDEX[selected.kind]];
-        layers.push(new PathLayer<Route>({
-          id: `route-${selected.id}`,
-          data: [selected],
-          getPath: (d) => d.geometry,
-          getColor: [...c, 220] as [number, number, number, number],
-          getWidth: 8,
-          widthMinPixels: 5,
-          widthMaxPixels: 12,
-          pickable: false,
-        }));
-      }
-    }
-    return layers;
-  }, [graph, time, routes, selectedKind]);
+    return [streetscoreLayer];
+  }, [graph, time, routes]);
 
   // ── Init MapLibre + Deck.gl overlay ──
   useEffect(() => {
@@ -647,12 +646,74 @@ export const MapApp = ({ graph }: { graph: GraphArtifact }) => {
     return () => { worker.terminate(); };
   }, [graph]);
 
-  // ── Update layers when time/routes change ──
+  // ── Update deck.gl layers when time/routes change ──
   useEffect(() => {
     if (overlayRef.current) {
       overlayRef.current.setProps({ layers: getLayers() });
     }
   }, [getLayers]);
+
+  // ── MapLibre route layers (glow + crisp) ──
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const GLOW_ID = "route-glow";
+    const LINE_ID = "route-line";
+    const SRC_ID  = "route-source";
+
+    const cleanup = () => {
+      if (map.getLayer(LINE_ID)) map.removeLayer(LINE_ID);
+      if (map.getLayer(GLOW_ID)) map.removeLayer(GLOW_ID);
+      if (map.getSource(SRC_ID)) map.removeSource(SRC_ID);
+    };
+
+    cleanup();
+
+    if (!routes) return;
+    const selected = routes.find(r => r.kind === selectedKind);
+    if (!selected) return;
+
+    const c = ROUTE_COLORS[KIND_INDEX[selected.kind]];
+    const color = `rgb(${c[0]},${c[1]},${c[2]})`;
+    const smoothed = smoothPath(selected.geometry as [number, number][]);
+
+    map.addSource(SRC_ID, {
+      type: "geojson",
+      data: {
+        type: "Feature",
+        properties: {},
+        geometry: { type: "LineString", coordinates: smoothed },
+      },
+    });
+
+    map.addLayer({
+      id: GLOW_ID,
+      type: "line",
+      source: SRC_ID,
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": color,
+        "line-width": 18,
+        "line-blur": 12,
+        "line-opacity": 0.35,
+      },
+    });
+
+    map.addLayer({
+      id: LINE_ID,
+      type: "line",
+      source: SRC_ID,
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": color,
+        "line-width": 5,
+        "line-opacity": 0.95,
+      },
+    });
+
+    return cleanup;
+  }, [routes, selectedKind]);
 
   // ── Route computation ──
   const handleFindRoute = useCallback((fromNode: number, toNode: number) => {
